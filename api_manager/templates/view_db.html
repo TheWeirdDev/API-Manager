@@ -1,0 +1,102 @@
+{% extends "base_main.html" %}
+
+{% block content %}
+
+<section class="section is-fullheight-with-navbar">
+    <div class="container">
+        <div class="columns is-centered">
+            <div class="column is-three-quarters-desktop">
+                <div class="level">
+                    <div class="level-left">
+                        <div class="level-item">
+                            <h5 class="title is-5">Database API details: </h5>
+                        </div>
+                    </div>
+                    <div class="level-right">
+                        <div class="level-item">
+                            <button class="button">Edit</button>
+                        </div>
+                        <div class="level-item">
+                            <button class="button is-success">Run</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table class="table is-fullwidth is-striped is-bordered">
+                        <thead class="has-background-info-light">
+                            <tr>
+                                <th>Name (EN)</th>
+                                <th>Name (FA)</th>
+                                <th>Server Name</th>
+                                <th>Server IP</th>
+                                <th>Port</th>
+                                <th>DB Username</th>
+                                <th>DB Password</th>
+                                <th>Health</th>
+                                <th>Running</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{database.name_en}}</td>
+                                <td>{{database.name_fa}}</td>
+                                <td>{{database.server_name}}</td>
+                                <td>{{database.server_ip}}</td>
+                                <td>{{database.port_number}}</td>
+                                <td>{{database.db_username}}</td>
+                                <td>{{database.db_password}}</td>
+                                <td>
+                                    <div class="tag is-success">GOOD</div>
+                                </td>
+                                <td>
+                                    <div class="tag is-success">YES</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="level">
+                    <div class="level-left">
+                        <div class="level-item">
+                            <h5 class="title is-5">Methods ({{database.querymethod_set.count}}):</h5>
+                        </div>
+                    </div>
+                    <div class="level-right">
+                        <div class="level-item">
+                            <a href="{% url 'add_method' database.pk %}">
+                                <button class="button is-link fa fa-plus"></button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% if database.querymethod_set.all %}
+                <div class="table-container">
+                    <table class="table is-fullwidth is-striped is-bordered">
+                        <thead class="has-background-info-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Query</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for method in database.querymethod_set.all %}
+                            <tr>
+                                <td>{{method.name}}</td>
+                                <td>{{method.query_text}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="notification is-info is-light" style="border: 1px dashed #22bbff;">
+                    There is no query method for this database
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}

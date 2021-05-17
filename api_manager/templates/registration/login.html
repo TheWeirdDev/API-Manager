@@ -1,10 +1,56 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Log In</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Log In</button>
-</form>
-{% endblock content %}
+<section class="hero column has-background-light is-fullheight-with-navbar">
+  <div class="hero-body">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-5-tablet is-4-desktop is-3-widescreen">
+          <form class="box" method="POST">
+            {% csrf_token %}
+            <h3 class="title is-3 has-text-centered">
+              Login
+            </h3>
+            <div class="field">
+              <label for="" class="label">Username</label>
+              <div class="control has-icons-left">
+                <input placeholder="Your username" class="input" name="username" required>
+                <span class="icon is-small is-left">
+                  <i class="fa fa-envelope"></i>
+                </span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="" class="label">Password</label>
+              <div class="control has-icons-left">
+                <input type="password" placeholder="*******" class="input" name="password" required>
+                <span class="icon is-small is-left">
+                  <i class="fa fa-lock"></i>
+                </span>
+              </div>
+            </div>
+            <div class="field">
+              <label for="" class="checkbox">
+                <input type="checkbox">
+                Remember me
+              </label>
+            </div>
+            <div class="field">
+              {% if form.errors %}
+              <p class="notification is-danger is-light">
+                Your username and password didn't match.
+                Please try again.
+              </p>
+              {% endif %}
+              <button class="button is-success">
+                Login
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

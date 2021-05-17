@@ -14,15 +14,33 @@
     <header>
         <nav class="navbar has-shadow navbar-padding is-link" role="navigation" aria-label="main navigation">
             <div class="navbar-brand">
-                <a class="navbar-item" href="{% url 'home' %}">
-                    <span class="icon"><i class="fa fa-home"></i></span> Home
+                <a class="navbar-item" href="{% url 'dashboard' %}">
+                    <span class="icon"><i class="fa fa-home"></i></span> Dashboard
                 </a>
                 <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navMenu">
                     <span aria-hidden="true"></span>
                     <span aria-hidden="true"></span>
                     <span aria-hidden="true"></span>
-                </a></div>
+                </a>
+            </div>
             <div class="navbar-menu" id="navMenu">
+                {% if user.is_authenticated %}
+                <div class="navbar-end">
+                    <a class="navbar-item is-tab is-hidden-tablet">
+                        <span class="icon"><i class="fa fa-search"></i></span> Search
+                    </a>
+                    <a class="navbar-item is-tab is-hidden-tablet">
+                        <span class="icon"><i class="fa fa-info"></i></span> Statistics
+                    </a>
+
+                    <a class="navbar-item is-tab is-active">
+                        <span class="icon"><i class="fa fa-user"></i></span>
+                    </a>
+                    <a class="navbar-item is-tab" href="{% url 'logout' %}">
+                        <span class="icon"><i class="fa fa-sign-out"></i></span>
+                    </a>
+                </div>
+                {% else %}
                 <div class="navbar-end">
                     <a class="navbar-item is-tab" href="{% url 'login' %}">
                         <span class="icon"><i class="fa fa-sign-in"></i></span>
@@ -31,16 +49,44 @@
                         <span class="icon"><i class="fa fa-user-plus"></i></span>
                     </a>
                 </div>
+                {% endif %}
             </div>
+
         </nav>
     </header>
-    <div class="has-background-light">
-        <main>
-            {% block content %}
-            {% endblock %}
-        </main>
-    </div>
 
+    <div class="columns">
+        {% if user.is_authenticated %}
+        <aside class="column is-2 is-narrow-mobile section is-hidden-mobile">
+            <nav class="menu">
+                <p class="menu-label is-hidden-touch">Navigation</p>
+                <ul class="menu-list">
+                    <li>
+                        <a href="{% url 'dashboard' %}" class="is-active">
+                            <span class="icon"><i class="fa fa-home"></i></span> Home
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="">
+                            <span class="icon"><i class="fa fa-search"></i></span> Search
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="">
+                            <span class="icon"><i class="fa fa-info"></i></span> Statistics
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+        <div class="column section is-10 has-background-light" style="min-height:calc(100vh - 3.25rem);">
+            <main>
+                {% block content %}
+                {% endblock %}
+            </main>
+        </div>
+        {% endif %}
+    </div>
     <footer>
 
     </footer>

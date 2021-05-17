@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from .models import DatabaseInfo, QueryMethod
 
 
 class SignUpForm(UserCreationForm):
@@ -15,3 +16,16 @@ class SignUpForm(UserCreationForm):
         model = User
         fields = ('username', 'first_name', 'last_name',
                   'email', 'password1', 'password2', )
+
+
+class ImportDatabaseForm(forms.ModelForm):
+    class Meta:
+        model = DatabaseInfo
+        fields = ('name_en', 'name_fa', 'server_ip', 'server_name',
+                  'port_number', 'db_username', 'db_password', 'config_file_name', 'shell_command')
+
+
+class AddMethodForm(forms.ModelForm):
+    class Meta:
+        model = QueryMethod
+        fields = ('name', 'query_text')

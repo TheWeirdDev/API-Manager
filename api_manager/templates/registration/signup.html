@@ -1,21 +1,86 @@
 {% extends 'base.html' %}
 
 {% block content %}
-  <h2>Sign up</h2>
-  <form method="post">
-    {% csrf_token %}
-    {% for field in form %}
-      <p>
-        {{ field.label_tag }}<br>
-        {{ field }}
-        {% if field.help_text %}
-          <small style="color: grey">{{ field.help_text }}</small>
-        {% endif %}
-        {% for error in field.errors %}
-          <p style="color: red">{{ error }}</p>
-        {% endfor %}
-      </p>
-    {% endfor %}
-    <button type="submit">Sign up</button>
-  </form>
+<section class="hero column has-background-light is-fullheight-with-navbar">
+  <div class="hero-body">
+    <div class="container">
+      <div class="columns is-centered">
+        <div class="column is-three-quarters-desktop">
+          <form class="box" method="POST">
+            <h3 class="title is-3">Sign up</h3>
+            {% csrf_token %}
+            <div class="columns">
+              <div class="field column">
+                <label for="id_username" class="label">Username:</label>
+                <div class="control">
+                  <input type="text" name="username" maxlength="150" class="input" autofocus required id="id_username">
+                </div>
+              </div>
+              <div class="field column">
+                <label for="id_email" class="label">Email:</label>
+                <div class="control has-icons-left">
+                  <input type="email" name="email" class="input" maxlength="254" required id="id_email">
+                  <span class="icon is-small is-left">
+                    <i class="fa fa-envelope"></i>
+                  </span>
+                  <small style="color: grey">Required. Inform a valid email address.</small>
+                </div>
+              </div>
+            </div>
+            <div class="columns">
+              <div class="field column">
+                <label for="id_first_name" class="label">First name:</label>
+                <div class="control">
+                  <input type="text" name="first_name" maxlength="30" class="input" id="id_first_name">
+                  <small style="color: grey">Optional.</small>
+                </div>
+              </div>
+              <div class="field column">
+                <label for="id_last_name" class="label">Last name:</label>
+                <div class="controls">
+                  <input type="text" name="last_name" maxlength="30" id="id_last_name" class="input">
+                  <small style="color: grey">Optional.</small>
+                </div>
+              </div>
+            </div>
+            <div class="columns">
+              <div class="field column">
+                <label for="id_password1" class="label">Password:</label>
+                <div class="control has-icons-left">
+                  <input type="password" name="password1" autocomplete="new-password" class="input" required
+                    id="id_password1">
+                  <span class="icon is-small is-left">
+                    <i class="fa fa-lock"></i>
+                  </span>
+                </div>
+              </div>
+              <div class="field column">
+                <label for="id_password2" class="label">Password confirmation:</label>
+                <div class="control has-icons-left">
+                  <input type="password" name="password2" class="input" autocomplete="new-password" required
+                    id="id_password2">
+                  <span class="icon is-small is-left">
+                    <i class="fa fa-lock"></i>
+                  </span>
+                  <small style="color: grey">Enter the same password as before, for verification.</small>
+                </div>
+              </div>
+            </div>
+            <div class="notification is-light is-info">
+              <small>
+                <ul style="list-style-type: disc; padding: 0.5rem;">
+                  <li>Your password can’t be too similar to your other personal information.</li>
+                  <li>Your password must contain at least 8 characters.</li>
+                  <li>Your password can’t be a commonly used password.</li>
+                  <li>Your password can’t be entirely numeric.</li>
+                </ul>
+              </small>
+            </div>
+            <button type="submit" class="button is-success">Sign up</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock %}

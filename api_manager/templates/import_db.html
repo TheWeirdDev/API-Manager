@@ -1,0 +1,85 @@
+{% extends "base_main.html" %}
+
+{% block content %}
+<section class="section is-fullheight-with-navbar">
+    <div class="container">
+        <div class="columns is-centered">
+            <div class="column is-three-quarters-desktop">
+                <form class="box" method="POST">
+                    <h3 class="title is-3">Add a New Database API</h3>
+                    {% csrf_token %}
+                    <div class="columns">
+                        <div class="field column">
+                            <label class="label" for="id_name_en">Name (English):</label>
+                            <div class="control">
+                                <input type="text" class="input" name="name_en" maxlength="50" required id="id_name_en">
+                            </div>
+                        </div>
+                        <div class="field column">
+                            <label class="label" for="id_name_fa">Name (Farsi):</label>
+                            <div class="control">
+                                <input type="text" class="input" name="name_fa" maxlength="50" required id="id_name_fa">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="field column">
+                            <label class="label" for="id_server_ip">Server IP:</label>
+                            <div class="control">
+                                <input type="text" class="input" name="server_ip" maxlength="50" required
+                                    id="id_server_ip">
+                            </div>
+                        </div>
+                        <div class="field column">
+                            <label class="label" for="id_server_name">Server Name:</label>
+                            <div class="control">
+                                <input type="text" class="input" name="server_name" maxlength="100" required
+                                    id="id_server_name">
+                            </div>
+                        </div>
+                        <div class="field column">
+                            <label class="label" for="id_port_number">Port:</label>
+                            <div class="control">
+                                <input type="text" class="input" name="port_number" value="0" required
+                                    id="id_port_number">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="field column">
+                            <label class="label" for="id_db_username">Database Username:</label>
+                            <div class="control">
+                                <input type="text" class="input" name="db_username" maxlength="50" required
+                                    id="id_db_username">
+                            </div>
+                        </div>
+                        <div class="field column">
+                            <label class="label" for="id_db_password">Database Password:</label>
+                            <div class="control">
+                                <input type="text" class="input" name="db_password" maxlength="100" required
+                                    id="id_db_password">
+                            </div>
+                        </div>
+
+                        <div class="field column">
+                            <label class="label" for="id_config_file_name">Config File Name:</label>
+                            <div class="control">
+                                <input type="text" class="input" name="config_file_name" maxlength="60" required
+                                    id="id_config_file_name">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label" for="id_shell_command">Shell Command:</label>
+                        <div class="control">
+                            <textarea class="textarea" name="shell_command" cols="40" rows="5" maxlength="500" required
+                                id="id_shell_command"></textarea>
+                        </div>
+                    </div>
+                    <button class="button is-success" type="submit">Add</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

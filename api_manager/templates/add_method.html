@@ -1,0 +1,30 @@
+{% extends "base_main.html" %}
+
+{% block content %}
+<section class="section is-fullheight-with-navbar">
+    <div class="container">
+        <div class="columns is-centered">
+            <div class="column is-three-quarters-desktop">
+                <form class="box" method="POST">
+                    <h3 class="title is-3">Add a New Method</h3>
+                    {% csrf_token %}
+                    <div class="field">
+                        <label class="label" for="id_name">Name:</label>
+                        <div class="control">
+                            <input type="text" class="input" name="name" maxlength="50" required id="id_name">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label" for="id_query_text">Query:</label>
+                        <div class="control">
+                            <textarea class="textarea" name="query_text" cols="40" rows="5" maxlength="500" required
+                                id="id_query_text"></textarea>
+                        </div>
+                    </div>
+                    <button class="button is-success" type="submit">Add</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
