@@ -1,0 +1,105 @@
+{% extends "base_main.html" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="columns is-centered">
+            <div class="column is-three-quarters-desktop">
+                <form class="box" method="POST">
+                    <h3 class="title is-3">
+                        {% if  view.kwargs.database_id  %}
+                        Edit Database
+                        {% else %}
+                        Add a New Database API
+                        {% endif %}
+                    </h3>
+                    {% csrf_token %}
+                    <div class="columns">
+                        <div class="field column">
+                            <label class="label" for="{{ form.name_en.id_for_label }}">Name (English):</label>
+                            <div class="control">
+                                {{ form.name_en }}
+                            </div>
+                        </div>
+                        <div class="field column">
+                            <label class="label" for="{{ form.name_fa.id_for_label }}">Name (Farsi):</label>
+                            <div class="control">
+                                {{ form.name_fa }}
+                            </div>
+                        </div>
+                        <div class="field column">
+                            <label class="label" for="{{ form.server_name.id_for_label }}">Server Name:</label>
+                            <div class="control">
+                                {{ form.server_name }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="field column">
+                            <label class="label" for="{{ form.server_ip.id_for_label }}">Server IP:</label>
+                            <div class="control">
+                                {{ form.server_ip }}
+                            </div>
+                        </div>
+                        <div class="field column">
+                            <label class="label" for="{{ form.port_number.id_for_label }}">Port:</label>
+                            <div class="control">
+                                {{ form.port_number }}
+                            </div>
+                        </div>
+                        <div class="field column">
+                            <label class="label" for="{{ form.status_url.id_for_label }}">Status URL:</label>
+                            <div class="control">
+                                {{ form.status_url }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="columns">
+                        <div class="field column">
+                            <label class="label" for="{{ form.db_username.id_for_label }}">Database Username:</label>
+                            <div class="control">
+                                {{ form.db_username }}
+                            </div>
+                        </div>
+                        <div class="field column">
+                            <label class="label" for="{{ form.db_password.id_for_label }}">Database Password:</label>
+                            <div class="control">
+                                {{ form.db_password }}
+                            </div>
+                        </div>
+
+                        <div class="field column">
+                            <label class="label" for="{{ form.config_file_name.id_for_label }}">Config File
+                                Name:</label>
+                            <div class="control">
+                                {{ form.config_file_name }}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if  view.kwargs.database_id  %}
+                    <div class="field">
+                        <label class="label" for="{{ form.shell_command.id_for_label }}">Shell Command:</label>
+                        {{ form.shell_command }}
+                        <small class="has-text-info-dark">
+                            Shell command is only auto-generated when first created,
+                            If you need to change the details, be sure to update shell command too
+                        </small>
+                    </div>
+                    {% else %}
+                    {{ form.shell_command.as_hidden }}
+                    {% endif %}
+
+                    <button class="button is-success" type="submit">
+                        {% if  view.kwargs.database_id  %}
+                        Edit
+                        {% else %}
+                        Add
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}

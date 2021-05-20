@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import DatabaseInfo, QueryMethod
+from django.forms.widgets import Textarea
 
 
 class SignUpForm(UserCreationForm):
@@ -18,14 +19,24 @@ class SignUpForm(UserCreationForm):
                   'email', 'password1', 'password2', )
 
 
-class ImportDatabaseForm(forms.ModelForm):
+class DatabaseForm(forms.ModelForm):
+    def __init__(self, is_edit, *args, **kwargs):
+        super(DatabaseForm, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            if isinstance(visible.field.widget, Textarea):
+                if not is_edit:
+                    visible.field.required = False
+                visible.field.widget.attrs['class'] = 'textarea'
+                visible.field.widget.attrs['rows'] = '5'
+            else:
+                visible.field.widget.attrs['class'] = 'input'
+
     class Meta:
         model = DatabaseInfo
-        fields = ('name_en', 'name_fa', 'server_ip', 'server_name',
-                  'port_number', 'db_username', 'db_password', 'config_file_name', 'shell_command')
+        exclude = ('creator', 'changed_date', 'created_date')
 
 
-class AddMethodForm(forms.ModelForm):
+class MethodForm(forms.ModelForm):
     class Meta:
         model = QueryMethod
         fields = ('name', 'query_text')
