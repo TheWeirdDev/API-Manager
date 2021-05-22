@@ -6,22 +6,33 @@
         <div class="columns is-centered">
             <div class="column is-three-quarters-desktop">
                 <form class="box" method="POST">
-                    <h3 class="title is-3">Add a New Method</h3>
+                    <h3 class="title is-3">
+                        {% if  view.kwargs.method_id  %}
+                        Edit Query Method
+                        {% else %}
+                        Add a New Query Method
+                        {% endif %}
+                    </h3>
                     {% csrf_token %}
                     <div class="field">
-                        <label class="label" for="id_name">Name:</label>
+                        <label class="label" for="{{ form.name.id_for_label }}">Name:</label>
                         <div class="control">
-                            <input type="text" class="input" name="name" maxlength="50" required id="id_name">
+                            {{ form.name }}
                         </div>
                     </div>
                     <div class="field">
-                        <label class="label" for="id_query_text">Query:</label>
+                        <label class="label" for="{{ form.query_text.id_for_label }}">Query:</label>
                         <div class="control">
-                            <textarea class="textarea" name="query_text" cols="40" rows="5" maxlength="500" required
-                                id="id_query_text"></textarea>
+                            {{ form.query_text }}
                         </div>
                     </div>
-                    <button class="button is-success" type="submit">Add</button>
+                    <button class="button is-success" type="submit">
+                        {% if  view.kwargs.method_id  %}
+                        Edit
+                        {% else %}
+                        Add
+                        {% endif %}
+                    </button>
                 </form>
             </div>
         </div>

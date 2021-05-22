@@ -82,7 +82,7 @@
                         <tbody>
                             {% for method in database.querymethod_set.all %}
                             <tr>
-                                <td>{{method.name}}</td>
+                                <td><a href="{% url 'edit_method' database.pk method.pk %}">{{method.name}}</a></td>
                                 <td>{{method.query_text}}</td>
                             </tr>
                             {% endfor %}

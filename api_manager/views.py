@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from .forms import SignUpForm, DatabaseForm, MethodForm
-from .models import DatabaseInfo
+from .models import DatabaseInfo, QueryMethod
 
 
 class HomePage(View):
@@ -57,10 +57,9 @@ class DatabaseEdit(FormView):
         return super(DatabaseEdit, self).form_invalid(form)
 
 
-class AddMethod(FormView):
-    template_name = "add_method.html"
+class MethodEdit(FormView):
+    template_name = "edit_method.html"
     form_class = MethodForm
-    success_url = '/'
 
     def get_initial(self):
         initial = super().get_initial()
@@ -69,17 +68,27 @@ class AddMethod(FormView):
         initial['database'] = self.database
         return initial
 
+    def get_form(self):
+        if 'method_id' in self.kwargs:
+            self.database = get_object_or_404(
+                QueryMethod, pk=self.kwargs.get('method_id'))
+            return self.form_class(instance=self.database, **self.get_form_kwargs())
+        return self.form_class(**self.get_form_kwargs())
+
     def get_success_url(self):
         return reverse('database', kwargs={'database_id': self.database.pk})
 
     def form_valid(self, form):
         if self.request.user.is_authenticated:
             method = form.save(commit=False)
-            method.creator = self.request.user
-            method.parent_db = self.database
+            if not hasattr(method, 'creator'):
+                method.creator = self.request.user
+                method.parent_db = self.database
+            else:
+                method.changed_date = timezone.now()
             method.save()
-            return super(AddMethod, self).form_valid(form)
-        return super(AddMethod, self).form_invalid(form)
+            return super(MethodEdit, self).form_valid(form)
+        return super(MethodEdit, self).form_invalid(form)
 
 
 class DatabaseView(TemplateView):

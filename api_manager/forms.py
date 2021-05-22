@@ -37,6 +37,15 @@ class DatabaseForm(forms.ModelForm):
 
 
 class MethodForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(MethodForm, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            if isinstance(visible.field.widget, Textarea):
+                visible.field.widget.attrs['class'] = 'textarea'
+                visible.field.widget.attrs['rows'] = '5'
+            else:
+                visible.field.widget.attrs['class'] = 'input'
+
     class Meta:
         model = QueryMethod
         fields = ('name', 'query_text')
