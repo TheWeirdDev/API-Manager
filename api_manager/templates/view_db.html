@@ -16,6 +16,9 @@
                         <a class="level-item" href="{% url 'edit_db' database.pk %}">
                             <button class="button">Edit</button>
                         </a>
+                        <a class="level-item is-primary" href="{% url 'gen_config' database.pk %}">
+                            <button class="button">Generate Config</button>
+                        </a>
                         <div class="level-item">
                             <button class="button is-success">Run</button>
                         </div>

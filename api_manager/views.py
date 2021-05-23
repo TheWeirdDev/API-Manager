@@ -2,14 +2,35 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
 from django.shortcuts import render, reverse
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, FileResponse
 from django.views.generic import TemplateView, View
 from django.views.generic.edit import FormView
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .forms import SignUpForm, DatabaseForm, MethodForm
 from .models import DatabaseInfo, QueryMethod
+
+import json
+
+LOGIN_URL = '/login/'
+
+
+@login_required(login_url=LOGIN_URL)
+def generate_json_config(request, database_id):
+    db = DatabaseInfo.objects.get(pk=database_id)
+    methods_dict = {i.name: i.query_text for i in db.querymethod_set.all()}
+    methods = [{name: query} for name, query in methods_dict.items()]
+    config = {
+        'server': db.server_ip,
+        'database': db.name_en,
+        'user': db.db_username,
+        'password': db.db_password,
+        'methods': methods
+    }
+    return FileResponse(json.dumps(config), filename=db.config_file_name)
 
 
 class HomePage(View):
@@ -20,18 +41,15 @@ class HomePage(View):
             return redirect('login')
 
 
-class Dashboard(TemplateView):
+class Dashboard(LoginRequiredMixin, TemplateView):
     template_name = "dashboard.html"
-
-    def dispatch(self, request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            return redirect('login')
-        return super(Dashboard, self).dispatch(request, *args, **kwargs)
+    login_url = LOGIN_URL
 
 
-class DatabaseEdit(FormView):
+class DatabaseEdit(LoginRequiredMixin, FormView):
     template_name = "edit_db.html"
     form_class = DatabaseForm
+    login_url = LOGIN_URL
 
     def get_success_url(self):
         if 'database_id' in self.kwargs:
@@ -57,9 +75,10 @@ class DatabaseEdit(FormView):
         return super(DatabaseEdit, self).form_invalid(form)
 
 
-class MethodEdit(FormView):
+class MethodEdit(LoginRequiredMixin, FormView):
     template_name = "edit_method.html"
     form_class = MethodForm
+    login_url = LOGIN_URL
 
     def get_initial(self):
         initial = super().get_initial()
@@ -91,8 +110,9 @@ class MethodEdit(FormView):
         return super(MethodEdit, self).form_invalid(form)
 
 
-class DatabaseView(TemplateView):
+class DatabaseView(LoginRequiredMixin, TemplateView):
     template_name = "view_db.html"
+    login_url = LOGIN_URL
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
