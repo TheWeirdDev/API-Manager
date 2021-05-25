@@ -26,26 +26,31 @@ class DatabaseInfo(models.Model):
     server_name = models.CharField(max_length=100)
     port_number = models.IntegerField(null=False, default=0)
 
+    db_name = models.CharField(max_length=50)
     db_username = models.CharField(max_length=50)
     db_password = models.CharField(max_length=100)
 
     config_file_name = models.CharField(max_length=60)
     shell_command = models.TextField(max_length=500)
     status_url = models.CharField(max_length=100)
+    running_pid = models.IntegerField(default=-1)
+    health = models.BooleanField(default=False)
 
     created_date = models.DateTimeField(default=timezone.now)
     changed_date = models.DateTimeField(null=True)
 
 
-@receiver(pre_save, sender=DatabaseInfo)
-def make_shell_command(sender, instance, **kwargs):
-    name = instance.name_en
-    port = instance.port_number
-    config_name = instance.config_file_name
+@receiver(post_save, sender=DatabaseInfo)
+def make_shell_command(sender, created, instance, **kwargs):
+    if created:
+        name = instance.name_en
+        port = instance.port_number
+        config_name = instance.config_file_name
 
-    cmd = f"docker run -d -v {config_name}:db/db.json -p {port}:80 --name {name}" \
-        " cr.isfahan.ir/ir.isfahan.db2rest:400.1.18"
-    instance.shell_command = cmd
+        cmd = f"docker run -d -v {config_name}:db/db.json -p {port}:80 --name {name}" \
+            " cr.isfahan.ir/ir.isfahan.db2rest:400.1.18"
+        instance.shell_command = cmd
+        instance.save()
 
 
 class QueryMethod(models.Model):

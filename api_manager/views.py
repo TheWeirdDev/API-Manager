@@ -55,6 +55,7 @@ class DatabaseEdit(LoginRequiredMixin, FormView):
                 database.creator = self.request.user
             else:
                 database.changed_date = timezone.now()
+            print(database.shell_command)
             database.save()
             return super(DatabaseEdit, self).form_valid(form)
         return super(DatabaseEdit, self).form_invalid(form)

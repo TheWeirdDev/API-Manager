@@ -16,21 +16,21 @@
                     {% csrf_token %}
                     <div class="columns">
                         <div class="field column">
-                            <label class="label" for="{{ form.name_en.id_for_label }}">Name (English):</label>
+                            <label class="label" for="{{ form.name_en.id_for_label }}">Project Name (English):</label>
                             <div class="control">
                                 {{ form.name_en }}
                             </div>
                         </div>
                         <div class="field column">
-                            <label class="label" for="{{ form.name_fa.id_for_label }}">Name (Farsi):</label>
+                            <label class="label" for="{{ form.name_fa.id_for_label }}">Project Name (Farsi):</label>
                             <div class="control">
                                 {{ form.name_fa }}
                             </div>
                         </div>
                         <div class="field column">
-                            <label class="label" for="{{ form.server_name.id_for_label }}">Server Name:</label>
+                            <label class="label" for="{{ form.db_name.id_for_label }}">Database Name:</label>
                             <div class="control">
-                                {{ form.server_name }}
+                                {{ form.db_name }}
                             </div>
                         </div>
                     </div>
@@ -48,9 +48,9 @@
                             </div>
                         </div>
                         <div class="field column">
-                            <label class="label" for="{{ form.status_url.id_for_label }}">Status URL:</label>
+                            <label class="label" for="{{ form.server_name.id_for_label }}">Server Name:</label>
                             <div class="control">
-                                {{ form.status_url }}
+                                {{ form.server_name }}
                             </div>
                         </div>
                     </div>
@@ -74,6 +74,13 @@
                             <div class="control">
                                 {{ form.config_file_name }}
                             </div>
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label class="label" for="{{ form.status_url.id_for_label }}">Status
+                            URL:</label>
+                        <div class="control">
+                            {{ form.status_url }}
                         </div>
                     </div>
 
