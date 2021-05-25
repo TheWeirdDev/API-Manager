@@ -18,21 +18,6 @@ import json
 LOGIN_URL = '/login/'
 
 
-@login_required(login_url=LOGIN_URL)
-def generate_json_config(request, database_id):
-    db = DatabaseInfo.objects.get(pk=database_id)
-    methods_dict = {i.name: i.query_text for i in db.querymethod_set.all()}
-    methods = [{name: query} for name, query in methods_dict.items()]
-    config = {
-        'server': db.server_ip,
-        'database': db.name_en,
-        'user': db.db_username,
-        'password': db.db_password,
-        'methods': methods
-    }
-    return FileResponse(json.dumps(config), filename=db.config_file_name)
-
-
 class HomePage(View):
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -137,3 +122,27 @@ def signup(request):
     else:
         form = SignUpForm()
     return render(request, 'registration/signup.html', {'form': form})
+
+
+@login_required(login_url=LOGIN_URL)
+def generate_json_config(request, database_id):
+    db = DatabaseInfo.objects.get(pk=database_id)
+    methods_dict = {i.name: i.query_text for i in db.querymethod_set.all()}
+    methods = [{name: query} for name, query in methods_dict.items()]
+    config = {
+        'server': db.server_ip,
+        'database': db.name_en,
+        'user': db.db_username,
+        'password': db.db_password,
+        'methods': methods
+    }
+    data = json.dumps(config)
+    response = HttpResponse(
+        content_type='text/json',
+        headers={
+            'Content-Disposition': f'attachment; filename="{db.config_file_name}"',
+            'Content-Length': len(data)
+        },
+    )
+    response.write(data)
+    return response

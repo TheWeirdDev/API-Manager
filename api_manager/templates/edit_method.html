@@ -26,13 +26,24 @@
                             {{ form.query_text }}
                         </div>
                     </div>
-                    <button class="button is-success" type="submit">
-                        {% if  view.kwargs.method_id  %}
-                        Edit
-                        {% else %}
-                        Add
-                        {% endif %}
-                    </button>
+                    <div class="level">
+                        <div class="level-left"></div>
+                        <div class="level-right">
+                            <div class="level-item">
+                                <a href="{{ view.get_success_url }}" class="button">Cancel</a>
+                            </div>
+                            <div class="level-item">
+                                <button class="button is-success" type="submit">
+                                    {% if  view.kwargs.method_id  %}
+                                    Edit
+                                    {% else %}
+                                    Add
+                                    {% endif %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                 </form>
             </div>
         </div>

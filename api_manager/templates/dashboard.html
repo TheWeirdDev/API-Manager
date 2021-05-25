@@ -61,36 +61,38 @@
         </div>
 
         {% if user.databaseinfo_set.all %}
-        <table class="table is-fullwidth is-striped is-bordered">
-            <thead class="has-background-info-light">
-                <tr>
-                    <th>#</th>
-                    <th>Name (EN)</th>
-                    <th>Name (FA)</th>
-                    <th>Server Name</th>
-                    <th>Server IP</th>
-                    <th>Port</th>
-                    <th>Running</th>
+        <div class="table-container">
+            <table class="table is-fullwidth is-striped is-bordered">
+                <thead class="has-background-info-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Name (EN)</th>
+                        <th>Name (FA)</th>
+                        <th>Server Name</th>
+                        <th>Server IP</th>
+                        <th>Port</th>
+                        <th>Running</th>
 
-                </tr>
-            </thead>
-            <tbody>
-                {% for db_info in user.databaseinfo_set.all %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td><a href="{% url 'database' db_info.pk %}">{{db_info.name_en}}</a></td>
-                    <td>{{db_info.name_fa}}</td>
-                    <td>{{db_info.server_name}}</td>
-                    <td>{{db_info.server_ip}}</td>
-                    <td>{{db_info.port_number}}</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for db_info in user.databaseinfo_set.all %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td><a href="{% url 'database' db_info.pk %}">{{db_info.name_en}}</a></td>
+                        <td>{{db_info.name_fa}}</td>
+                        <td>{{db_info.server_name}}</td>
+                        <td>{{db_info.server_ip}}</td>
+                        <td>{{db_info.port_number}}</td>
 
-                    <td>
-                        <div class="tag is-success">YES</div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        <td>
+                            <div class="tag is-success">YES</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
 
         {% else %}
         <div class="notification is-info is-light" style="border: 1px dashed #22bbff;">
