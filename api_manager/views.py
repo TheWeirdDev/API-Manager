@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login, authenticate
 from django.shortcuts import render, reverse
-from django.http import HttpResponse, HttpResponseRedirect, FileResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic import TemplateView, View
 from django.views.generic.edit import FormView
 from django.shortcuts import get_object_or_404
@@ -13,7 +13,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import SignUpForm, DatabaseForm, MethodForm
 from .models import DatabaseInfo, QueryMethod
 
+from .utils import run_command, check_status, stop_docker
 import json
+import time
 
 LOGIN_URL = '/login/'
 
@@ -55,7 +57,6 @@ class DatabaseEdit(LoginRequiredMixin, FormView):
                 database.creator = self.request.user
             else:
                 database.changed_date = timezone.now()
-            print(database.shell_command)
             database.save()
             return super(DatabaseEdit, self).form_valid(form)
         return super(DatabaseEdit, self).form_invalid(form)
@@ -147,3 +148,51 @@ def generate_json_config(request, database_id):
     )
     response.write(data)
     return response
+
+
+@login_required(login_url=LOGIN_URL)
+def run_api(request, database_id):
+    database = get_object_or_404(DatabaseInfo, pk=database_id)
+    if database.docker_id != "":
+        return JsonResponse({'error': "API is already running"})
+    docker_id = run_command(database.shell_command)
+    resp = {'running': False, 'docker_id': docker_id, 'health_ok': False}
+    if docker_id != "" and docker_id != None:
+        database.docker_id = docker_id
+        database.save()
+        resp['running'] = True
+        time.sleep(0.5)
+        if check_status(database) == 200:
+            resp['health_ok'] = True
+            database.health = True
+            database.save()
+    return JsonResponse(resp)
+
+
+@login_required(login_url=LOGIN_URL)
+def stop_api(request, database_id):
+    database = get_object_or_404(DatabaseInfo, pk=database_id)
+    if database.docker_id == "":
+        return JsonResponse({'error': "API is not running"})
+    if stop_docker(database.docker_id):
+        database.docker_id = ""
+        database.health = False
+        database.save()
+        return JsonResponse({'running': "False"})
+    else:
+        return JsonResponse({'error': "Can't stop API"})
+
+
+@login_required(login_url=LOGIN_URL)
+def check_health(request, database_id):
+    database = get_object_or_404(DatabaseInfo, pk=database_id)
+    if database.docker_id == "":
+        return JsonResponse({'error': 'API is not running'})
+    if check_status(database) == 200:
+        database.health = True
+        database.save()
+        return JsonResponse({'health_ok': True})
+    else:
+        database.health = False
+        database.save()
+        return JsonResponse({'error': 'API status code is not 200'})

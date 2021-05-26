@@ -1,5 +1,5 @@
 {% extends "base_main.html" %}
-
+{% load tags %}
 {% block content %}
 <div class="columns is-vcentered is-centered">
     <div class="column is-four-fifths" style="margin: 1rem;">
@@ -30,7 +30,7 @@
                         <p class="card-header-title">Running</p>
                     </div>
                     <div class="card-content">
-                        <div class="content">X</div>
+                        <div class="content">{{ user.databaseinfo_set|count_running }}</div>
                     </div>
                 </div>
             </div>
@@ -40,7 +40,7 @@
                         <p class="card-header-title">Stopped</p>
                     </div>
                     <div class="card-content">
-                        <div class="content">X</div>
+                        <div class="content">{{ user.databaseinfo_set|count_stopped }}</div>
                     </div>
                 </div>
             </div>
@@ -71,6 +71,8 @@
                         <th>Server Name</th>
                         <th>Server IP</th>
                         <th>Port</th>
+                        <th>Database</th>
+                        <th>Health</th>
                         <th>Running</th>
 
                     </tr>
@@ -84,9 +86,22 @@
                         <td>{{db_info.server_name}}</td>
                         <td>{{db_info.server_ip}}</td>
                         <td>{{db_info.port_number}}</td>
-
+                        <td>{{db_info.db_name}}</td>
                         <td>
+                            {% if db_info.docker_id != "" %}
+                            {% if db_info.health %}
+                            <div class="tag is-success">GOOD</div>
+                            {% else %}
+                            <div class="tag is-damger">BAD</div>
+                            {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if db_info.docker_id != "" %}
                             <div class="tag is-success">YES</div>
+                            {% else %}
+                            <div class="tag is-danger">NO</div>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

@@ -18,4 +18,10 @@ urlpatterns = [
          views.MethodEdit.as_view(), name='add_method'),
     path('dashboard/db/<int:database_id>/edit_method/<int:method_id>/',
          views.MethodEdit.as_view(), name='edit_method'),
+    path('dashboard/db/<int:database_id>/run/',
+         views.run_api, name='run_api'),
+    path('dashboard/db/<int:database_id>/stop/',
+         views.stop_api, name='stop_api'),
+    path('dashboard/db/<int:database_id>/check_health/',
+         views.check_health, name='check_health'),
 ]

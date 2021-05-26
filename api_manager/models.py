@@ -33,7 +33,7 @@ class DatabaseInfo(models.Model):
     config_file_name = models.CharField(max_length=60)
     shell_command = models.TextField(max_length=500)
     status_url = models.CharField(max_length=100)
-    running_pid = models.IntegerField(default=-1)
+    docker_id = models.CharField(max_length=128, default="")
     health = models.BooleanField(default=False)
 
     created_date = models.DateTimeField(default=timezone.now)

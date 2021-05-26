@@ -34,7 +34,7 @@ class DatabaseForm(forms.ModelForm):
     class Meta:
         model = DatabaseInfo
         exclude = ('creator', 'changed_date',
-                   'created_date', 'running_pid', 'health')
+                   'created_date', 'docker_id', 'health')
 
 
 class MethodForm(forms.ModelForm):

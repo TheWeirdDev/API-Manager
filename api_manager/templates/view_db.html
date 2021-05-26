@@ -19,9 +19,20 @@
                         <a class="level-item is-primary" href="{% url 'gen_config' database.pk %}">
                             <button class="button">Generate Config</button>
                         </a>
-                        <div class="level-item">
+                        <a class="level-item is-primary" href="{% url 'check_health' database.pk %}">
+                            <button class="button">Check Health</button>
+                        </a>
+
+                        {% if database.docker_id != "" %}
+                        <a class="level-item" href="{% url 'stop_api' database.pk %}">
+                            <button class="button is-danger">Stop</button>
+                        </a>
+                        {% else %}
+                        <a class="level-item" href="{% url 'run_api' database.pk %}">
                             <button class="button is-success">Run</button>
-                        </div>
+                        </a>
+                        {% endif %}
+
                     </div>
                 </div>
 
@@ -52,14 +63,30 @@
                                 <td>{{database.db_username}}</td>
                                 <td>{{database.db_password}}</td>
                                 <td>
+                                    {% if database.docker_id != "" %}
+                                    {% if database.health %}
                                     <div class="tag is-success">GOOD</div>
+                                    {% else %}
+                                    <div class="tag is-danger">BAD</div>
+                                    {% endif %}
+                                    {% endif %}
+
                                 </td>
                                 <td>
+                                    {% if database.docker_id != "" %}
                                     <div class="tag is-success">YES</div>
+                                    {% else %}
+                                    <div class="tag is-danger">NO</div>
+                                    {% endif %}
                                 </td>
+
                             </tr>
                         </tbody>
                     </table>
+                </div>
+                <h5 class="title is-5">Shell Command: </h5>
+                <div class="highlight">
+                    <pre><code>{{database.shell_command}}</code></pre>
                 </div>
                 <div class="level">
                     <div class="level-left">

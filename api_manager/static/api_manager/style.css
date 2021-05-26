@@ -2,3 +2,12 @@
     padding-left: 4rem;
     padding-right: 4rem;
 }
+
+.sidebar {
+    height: 50vh;
+    min-height: 200px;
+    overflow: auto;
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+}
