@@ -6,6 +6,9 @@
     <div class="container">
         <div class="columns is-centered">
             <div class="column is-three-quarters-desktop">
+                <div class="notification is-danger" style="display: none;" id="notif">
+                    <button class="delete"></button>
+                </div>
                 <div class="level">
                     <div class="level-left">
                         <div class="level-item">
@@ -19,18 +22,18 @@
                         <a class="level-item is-primary" href="{% url 'gen_config' database.pk %}">
                             <button class="button">Generate Config</button>
                         </a>
-                        <a class="level-item is-primary" href="{% url 'check_health' database.pk %}">
-                            <button class="button">Check Health</button>
+                        <a class="level-item is-primary">
+                            <button class="button" id="check_health">Check Health</button>
                         </a>
 
                         {% if database.docker_id != "" %}
-                        <a class="level-item" href="{% url 'stop_api' database.pk %}">
-                            <button class="button is-danger">Stop</button>
-                        </a>
+                        <div class="level-item">
+                            <button class="button is-danger" id="stop_api">Stop</button>
+                        </div>
                         {% else %}
-                        <a class="level-item" href="{% url 'run_api' database.pk %}">
-                            <button class="button is-success">Run</button>
-                        </a>
+                        <div class="level-item">
+                            <button class="button is-success" id="run_api">Run</button>
+                        </div>
                         {% endif %}
 
                     </div>
@@ -132,3 +135,80 @@
 </section>
 
 {% endblock content %}
+{% block scripts %}
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+            const $notification = $delete.parentNode;
+
+            $delete.addEventListener('click', () => {
+                const notif = $($notification);
+                notif.css('display', 'none');
+                const del = notif.find('.delete');
+                notif.html("");
+                notif.append(del);
+            });
+        });
+    });
+
+    function setNotification(msg) {
+        const notif = $("#notif");
+        notif.css('display', 'block');
+        const del = notif.find('.delete');
+        notif.html(msg);
+        notif.append(del);
+    }
+    $("#check_health").click(function () {
+        $.ajax({
+            dataType: 'json',
+            url: "{% url 'check_health' database.pk %}",
+            success: function (data) {
+                if (data.error) {
+                    setNotification(data.error);
+                    return;
+                }
+                location.reload();
+            },
+            error: function (data) {
+                setNotification("Can't check heatlh'");
+            },
+        });
+    });
+    $("#run_api").click(function () {
+        $.ajax({
+            dataType: 'json',
+            url: "{% url 'run_api' database.pk %}",
+            success: function (data) {
+                if (data.docker_id != "" && data.running) {
+                    location.reload();
+                } else {
+                    setNotification("Can't start API");
+                }
+            },
+            error: function (data) {
+                setNotification("Can't start API");
+            },
+        });
+    });
+
+    $("#stop_api").click(function () {
+        setNotification("Stopping... ");
+        $.ajax({
+            dataType: 'json',
+            url: "{% url 'stop_api' database.pk %}",
+            success: function (data) {
+                if (data.error) {
+                    setNotification(data.error);
+                    return;
+                }
+                console.log(data)
+                if (data.running) {
+                    setNotification("Can't stop the API, try stopping manually");
+                } else {
+                    location.reload();
+                }
+            }
+        });
+    });
+</script>
+{% endblock scripts %}

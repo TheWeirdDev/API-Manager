@@ -13,8 +13,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .forms import SignUpForm, DatabaseForm, MethodForm
 from .models import DatabaseInfo, QueryMethod
 
-from .utils import run_command, check_status, stop_docker
-import json
+from .utils import *
 import time
 
 LOGIN_URL = '/login/'
@@ -53,10 +52,14 @@ class DatabaseEdit(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         if self.request.user.is_authenticated:
             database = form.save(commit=False)
+
             if not hasattr(database, 'creator'):
                 database.creator = self.request.user
             else:
+                if not database.shell_command.startswith('docker run -d'):
+                    return super(DatabaseEdit, self).form_invalid(form)
                 database.changed_date = timezone.now()
+
             database.save()
             return super(DatabaseEdit, self).form_valid(form)
         return super(DatabaseEdit, self).form_invalid(form)
@@ -129,24 +132,15 @@ def signup(request):
 @login_required(login_url=LOGIN_URL)
 def generate_json_config(request, database_id):
     db = DatabaseInfo.objects.get(pk=database_id)
-    methods_dict = {i.name: i.query_text for i in db.querymethod_set.all()}
-    methods = [{name: query} for name, query in methods_dict.items()]
-    config = {
-        'server': db.server_ip,
-        'database': db.name_en,
-        'user': db.db_username,
-        'password': db.db_password,
-        'methods': methods
-    }
-    data = json.dumps(config)
+    config = generate_json(db)
     response = HttpResponse(
         content_type='text/json',
         headers={
             'Content-Disposition': f'attachment; filename="{db.config_file_name}"',
-            'Content-Length': len(data)
+            'Content-Length': len(config)
         },
     )
-    response.write(data)
+    response.write(config)
     return response
 
 
@@ -155,13 +149,17 @@ def run_api(request, database_id):
     database = get_object_or_404(DatabaseInfo, pk=database_id)
     if database.docker_id != "":
         return JsonResponse({'error': "API is already running"})
+
+    # Make sure db config file exists
+    prepare_db_config(database)
+
     docker_id = run_command(database.shell_command)
     resp = {'running': False, 'docker_id': docker_id, 'health_ok': False}
     if docker_id != "" and docker_id != None:
         database.docker_id = docker_id
         database.save()
         resp['running'] = True
-        time.sleep(0.5)
+        time.sleep(1)
         if check_status(database) == 200:
             resp['health_ok'] = True
             database.health = True
@@ -178,7 +176,7 @@ def stop_api(request, database_id):
         database.docker_id = ""
         database.health = False
         database.save()
-        return JsonResponse({'running': "False"})
+        return JsonResponse({'running': False})
     else:
         return JsonResponse({'error': "Can't stop API"})
 

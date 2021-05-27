@@ -2,6 +2,12 @@ import subprocess
 import urllib
 import urllib.error
 import docker
+import json
+
+
+def prepare_db_config(db):
+    with open(f"/tmp/{db.config_file_name}", 'w') as f:
+        f.write(generate_json(db))
 
 
 def run_command(cmd):
@@ -31,3 +37,16 @@ def check_status(db):
     except urllib.error.URLError:
         return -1
     return http_req.getcode()
+
+
+def generate_json(db):
+    methods_dict = {i.name: i.query_text for i in db.querymethod_set.all()}
+    methods = [{name: query} for name, query in methods_dict.items()]
+    config = {
+        'server': db.server_ip,
+        'database': db.db_name,
+        'user': db.db_username,
+        'password': db.db_password,
+        'methods': methods
+    }
+    return json.dumps(config)

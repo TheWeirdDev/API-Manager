@@ -88,10 +88,19 @@
                     <div class="field">
                         <label class="label" for="{{ form.shell_command.id_for_label }}">Shell Command:</label>
                         {{ form.shell_command }}
-                        <small class="has-text-info-dark">
-                            Shell command is only auto-generated when first created,
-                            If you need to change the details, be sure to update shell command too
-                        </small>
+                        <ul style="list-style-type: circle; padding: 1rem;">
+                            <li>
+                                <small class="has-text-info-dark">
+                                    Shell command is only auto-generated when first created,
+                                    If you need to change the details, be sure to update shell command too
+                                </small>
+                            </li>
+                            <li>
+                                <small class="has-text-info-dark">
+                                    Shell command should start with "docker run -d", otherwise it will not be saved
+                                </small>
+                            </li>
+                        </ul>
                     </div>
                     {% else %}
                     {{ form.shell_command.as_hidden }}
