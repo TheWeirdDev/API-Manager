@@ -24,4 +24,6 @@ urlpatterns = [
          views.stop_api, name='stop_api'),
     path('dashboard/db/<int:database_id>/check_health/',
          views.check_health, name='check_health'),
+    path('dashboard/search/',
+         views.search_view, name='search'),
 ]

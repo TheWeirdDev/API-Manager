@@ -10,11 +10,10 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .forms import SignUpForm, DatabaseForm, MethodForm
+from .forms import SignUpForm, DatabaseForm, MethodForm, SearchForm
 from .models import DatabaseInfo, QueryMethod
 
 from .utils import *
-import time
 
 LOGIN_URL = '/login/'
 
@@ -112,6 +111,26 @@ class DatabaseView(LoginRequiredMixin, TemplateView):
         return context
 
 
+def search_view(request):
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            is_method = False
+            query = form.cleaned_data.get('search_query')
+            category = form.cleaned_data.get("category")
+            if category == "method_name":
+                items = QueryMethod.objects.filter(name__contains=query)
+                is_method = True
+            else:
+                items = DatabaseInfo.objects.filter(
+                    **{f'{category}__contains': query}
+                )
+            return render(request, 'search.html', {'form': form, 'items': items, 'is_method': is_method})
+    else:
+        form = SearchForm()
+        return render(request, 'search.html', {'form': form, 'is_get': True})
+
+
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -159,7 +178,6 @@ def run_api(request, database_id):
         database.docker_id = docker_id
         database.save()
         resp['running'] = True
-        time.sleep(1)
         if check_status(database) == 200:
             resp['health_ok'] = True
             database.health = True

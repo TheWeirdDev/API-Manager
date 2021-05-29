@@ -19,6 +19,21 @@ class SignUpForm(UserCreationForm):
                   'email', 'password1', 'password2', )
 
 
+class SearchForm(forms.Form):
+    categories = (('name_en', "Project Name (EN)"),
+                  ('name_fa', 'Project Name (FA)'),
+                  ('db_name', 'Database Name'),
+                  ('method_name', 'Method Name '),
+                  ('server_name', 'Server Name '),
+                  ('server_ip', 'Server IP'),
+                  ('config_file_name', 'Config File Name'),
+                  )
+    category = forms.ChoiceField(
+        label='Category', widget=forms.Select, choices=categories)
+    search_query = forms.CharField(
+        max_length=100, widget=forms.TextInput(attrs={'class': 'input', 'placeholder': 'Search...'}))
+
+
 class DatabaseForm(forms.ModelForm):
     def __init__(self, is_edit, *args, **kwargs):
         super(DatabaseForm, self).__init__(*args, **kwargs)

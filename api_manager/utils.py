@@ -3,6 +3,7 @@ import urllib
 import urllib.error
 import docker
 import json
+import time
 
 
 def prepare_db_config(db):
@@ -14,6 +15,7 @@ def run_command(cmd):
     try:
         process = subprocess.run(
             cmd.split(), stdout=subprocess.PIPE)
+        time.sleep(1)
         if process.returncode > 0:
             return None
         return process.stdout.decode("utf-8").strip()

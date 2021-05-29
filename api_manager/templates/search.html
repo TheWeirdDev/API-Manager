@@ -1,0 +1,124 @@
+{% extends "base_main.html" %}
+
+{% block content %}
+<section class="section">
+    <div class="container">
+        <div class="columns is-centered">
+            <div class="column is-three-quarters-desktop">
+                <form method="POST">
+                    <div class="field has-addons">
+                        {% csrf_token %}
+                        <p class="control">
+                            <span class="select">
+                                {{ form.category }}
+                            </span>
+                        </p>
+                        <p class="control is-expanded">
+                            {{ form.search_query }}
+                        </p>
+                        <p class="control">
+                            <button class="button" type="submit">
+                                Search
+                            </button>
+                        </p>
+
+                    </div>
+                </form>
+                <div class="level">
+                    <div class="level-left">
+                        <div class="level-item">
+                            <h5 class="title is-5">Results: </h5>
+                        </div>
+                    </div>
+                </div>
+                {% if items %}
+
+                {% if is_method %}
+                <div class="table-container">
+                    <table class="table is-fullwidth is-striped is-bordered">
+                        <thead class="has-background-info-light">
+                            <tr>
+                                <th>Database</th>
+                                <th>Method Name</th>
+                                <th>Query</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for method in items %}
+                            <tr>
+                                <td><a
+                                        href="{% url 'database' method.parent_db.id %}">{{ method.parent_db.name_en }}</a>
+                                </td>
+                                <td>{{method.name}} </td>
+                                <td>{{method.query_text}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+
+                <div class="table-container">
+                    <table class="table is-fullwidth is-striped is-bordered">
+                        <thead class="has-background-info-light">
+                            <tr>
+                                <th>#</th>
+                                <th>Name (EN)</th>
+                                <th>Name (FA)</th>
+                                <th>Server Name</th>
+                                <th>Server IP</th>
+                                <th>Port</th>
+                                <th>Database</th>
+                                <th>Health</th>
+                                <th>Running</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for db_info in items %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td><a href="{% url 'database' db_info.pk %}">{{db_info.name_en}}</a></td>
+                                <td>{{db_info.name_fa}}</td>
+                                <td>{{db_info.server_name}}</td>
+                                <td>{{db_info.server_ip}}</td>
+                                <td>{{db_info.port_number}}</td>
+                                <td>{{db_info.db_name}}</td>
+                                <td>
+                                    {% if db_info.docker_id != "" %}
+                                    {% if db_info.health %}
+                                    <div class="tag is-success">GOOD</div>
+                                    {% else %}
+                                    <div class="tag is-damger">BAD</div>
+                                    {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if db_info.docker_id != "" %}
+                                    <div class="tag is-success">YES</div>
+                                    {% else %}
+                                    <div class="tag is-danger">NO</div>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+                {% else %}
+
+                {% if is_get %}
+                Use the search bar above to find anything you need.
+                {% else %}
+                <div class="notification is-info is-light" style="border: 1px dashed #22bbff;">
+                    No results
+                </div>
+                {% endif %}
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
