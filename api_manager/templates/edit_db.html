@@ -125,7 +125,13 @@
                     {% endif %}
 
                     <div class="level">
-                        <div class="level-left"></div>
+                        <div class="level-left">
+                            {% if  view.kwargs.database_id  %}
+                            <a class="button is-danger" href="{% url 'delete_db' view.kwargs.database_id %}">
+                                Delete Database
+                            </a>
+                            {% endif %}
+                        </div>
                         <div class="level-right">
                             <div class="level-item">
                                 <a href="{{ view.get_success_url }}" class="button">Cancel</a>

@@ -123,6 +123,25 @@ class DatabaseView(LoginRequiredMixin, TemplateView):
         return context
 
 
+@login_required(login_url=LOGIN_URL)
+def delete_database(request, database_id):
+    db = get_object_or_404(DatabaseInfo, pk=database_id)
+    if request.user != db.creator:
+        return redirect(reverse('edit_db', kwargs={'database_id': database_id}))
+    db.delete()
+    return redirect(reverse('dashboard'))
+
+
+@login_required(login_url=LOGIN_URL)
+def delete_method(request, database_id, method_id):
+    method = get_object_or_404(QueryMethod, pk=method_id)
+    if request.user != method.creator:
+        return redirect(reverse('database', kwargs={'database_id': database_id}))
+    method.delete()
+    return redirect(reverse('database', kwargs={'database_id': database_id}))
+
+
+@login_required(login_url=LOGIN_URL)
 def search_view(request):
     if request.method == 'POST':
         form = SearchForm(request.POST)

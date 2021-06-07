@@ -2,6 +2,7 @@ import subprocess
 import urllib
 import urllib.error
 import docker
+from docker.errors import DockerException, NotFound, ContainerError
 import json
 import time
 
@@ -27,7 +28,7 @@ def check_docker_daemon():
     try:
         client = docker.from_env()
         return client is not None
-    except:
+    except DockerException:
         return False
 
 
@@ -36,7 +37,7 @@ def stop_docker(docker_id):
         client = docker.from_env()
         client.containers.get(docker_id).stop()
         return True
-    except:
+    except (DockerExceptionm, NotFound, ContainerError) as e:
         return False
 
 
