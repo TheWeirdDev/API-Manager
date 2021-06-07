@@ -23,6 +23,14 @@ def run_command(cmd):
         return None
 
 
+def check_docker_daemon():
+    try:
+        client = docker.from_env()
+        return client is not None
+    except:
+        return False
+
+
 def stop_docker(docker_id):
     try:
         client = docker.from_env()

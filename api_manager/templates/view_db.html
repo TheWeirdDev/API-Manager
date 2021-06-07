@@ -1,7 +1,10 @@
 {% extends "base_main.html" %}
 
-{% block content %}
+{% block sidebar %}
+{% include "includes/sidebar.html" with active_tab="dashboard" %}
+{% endblock sidebar %}
 
+{% block content %}
 <section class="section">
     <div class="container">
         <div class="columns is-centered">
@@ -137,27 +140,6 @@
 {% endblock content %}
 {% block scripts %}
 <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', () => {
-        (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
-            const $notification = $delete.parentNode;
-
-            $delete.addEventListener('click', () => {
-                const notif = $($notification);
-                notif.css('display', 'none');
-                const del = notif.find('.delete');
-                notif.html("");
-                notif.append(del);
-            });
-        });
-    });
-
-    function setNotification(msg) {
-        const notif = $("#notif");
-        notif.css('display', 'block');
-        const del = notif.find('.delete');
-        notif.html(msg);
-        notif.append(del);
-    }
     $("#check_health").click(function () {
         $.ajax({
             dataType: 'json',

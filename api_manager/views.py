@@ -8,7 +8,9 @@ from django.views.generic.edit import FormView
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import auth_login
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import IntegrityError
 
 from .forms import SignUpForm, DatabaseForm, MethodForm, SearchForm
 from .models import DatabaseInfo, QueryMethod
@@ -30,6 +32,11 @@ class Dashboard(LoginRequiredMixin, TemplateView):
     template_name = "dashboard.html"
     login_url = LOGIN_URL
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['docker_ok'] = check_docker_daemon()
+        return context
+
 
 class DatabaseEdit(LoginRequiredMixin, FormView):
     template_name = "edit_db.html"
@@ -49,19 +56,20 @@ class DatabaseEdit(LoginRequiredMixin, FormView):
         return self.form_class(False, **self.get_form_kwargs())
 
     def form_valid(self, form):
-        if self.request.user.is_authenticated:
-            database = form.save(commit=False)
+        database = form.save(commit=False)
 
-            if not hasattr(database, 'creator'):
-                database.creator = self.request.user
-            else:
-                if not database.shell_command.startswith('docker run -d'):
-                    return super(DatabaseEdit, self).form_invalid(form)
-                database.changed_date = timezone.now()
+        if not hasattr(database, 'creator'):
+            database.creator = self.request.user
+        else:
+            PREFIX = 'docker run -d'
+            if not database.shell_command.startswith(PREFIX):
+                form.add_error('shell_command',
+                               f'Shell command has to star with "{PREFIX}"')
+                return super(DatabaseEdit, self).form_invalid(form)
+            database.changed_date = timezone.now()
 
-            database.save()
-            return super(DatabaseEdit, self).form_valid(form)
-        return super(DatabaseEdit, self).form_invalid(form)
+        database.save()
+        return super(DatabaseEdit, self).form_valid(form)
 
 
 class MethodEdit(LoginRequiredMixin, FormView):
@@ -87,16 +95,20 @@ class MethodEdit(LoginRequiredMixin, FormView):
         return reverse('database', kwargs={'database_id': self.database.pk})
 
     def form_valid(self, form):
-        if self.request.user.is_authenticated:
-            method = form.save(commit=False)
-            if not hasattr(method, 'creator'):
-                method.creator = self.request.user
-                method.parent_db = self.database
-            else:
-                method.changed_date = timezone.now()
+        method = form.save(commit=False)
+        if not hasattr(method, 'creator'):
+            method.creator = self.request.user
+            method.parent_db = self.database
+        else:
+            method.changed_date = timezone.now()
+
+        try:
             method.save()
-            return super(MethodEdit, self).form_valid(form)
-        return super(MethodEdit, self).form_invalid(form)
+        except IntegrityError:
+            form.add_error(
+                'name', "Database already has a method with this name")
+            return super(MethodEdit, self).form_invalid(form)
+        return super(MethodEdit, self).form_valid(form)
 
 
 class DatabaseView(LoginRequiredMixin, TemplateView):

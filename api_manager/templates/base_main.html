@@ -33,10 +33,6 @@
                     <a class="navbar-item is-tab is-hidden-tablet">
                         <span class="icon"><i class="fa fa-info"></i></span> Statistics
                     </a>
-
-                    <a class="navbar-item is-tab is-active">
-                        <span class="icon"><i class="fa fa-user"></i></span>
-                    </a>
                     <a class="navbar-item is-tab" href="{% url 'logout' %}">
                         <span class="icon"><i class="fa fa-sign-out"></i></span>
                     </a>
@@ -56,37 +52,15 @@
         </nav>
     </header>
 
-    <div class="columns" ">
-        {% if user.is_authenticated %}
-        <aside class=" column is-2 is-narrow-mobile section is-hidden-mobile sidebar">
-        <nav class=" menu">
-            <p class="menu-label is-hidden-touch">Navigation</p>
-            <ul class="menu-list">
-                <li>
-                    <a href="{% url 'dashboard' %}" class="is-active">
-                        <span class="icon"><i class="fa fa-home"></i></span> Dashboard
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="">
-                        <span class="icon"><i class="fa fa-search"></i></span> Search
-                    </a>
-                </li>
-                <li>
-                    <a href="#" class="">
-                        <span class="icon"><i class="fa fa-info"></i></span> Statistics
-                    </a>
-                </li>
-            </ul>
-        </nav>
-        </aside>
+    <div class="columns">
+        {% block sidebar %}
+        {% endblock sidebar %}
         <div class="column section is-10 has-background-light" style="min-height:calc(100vh - 3.25rem);">
             <main>
                 {% block content %}
-                {% endblock %}
+                {% endblock content %}
             </main>
         </div>
-        {% endif %}
     </div>
     <footer>
 
@@ -110,6 +84,28 @@
                 });
             }
         });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+                const $notification = $delete.parentNode;
+
+                $delete.addEventListener('click', () => {
+                    const notif = $($notification);
+                    notif.css('display', 'none');
+                    const del = notif.find('.delete');
+                    notif.html("");
+                    notif.append(del);
+                });
+            });
+        });
+
+        function setNotification(msg) {
+            const notif = $("#notif");
+            notif.css('display', 'block');
+            const del = notif.find('.delete');
+            notif.html(msg);
+            notif.append(del);
+        }
     </script>
     {% block scripts %}
     {% endblock scripts %}

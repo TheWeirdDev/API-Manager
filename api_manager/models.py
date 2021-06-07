@@ -5,18 +5,6 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    role = models.CharField(max_length=50, blank=True)
-
-
-@receiver(post_save, sender=User)
-def update_user_profile(sender, instance, created, **kwargs):
-    if created:
-        Profile.objects.create(user=instance)
-    instance.profile.save()
-
-
 class DatabaseInfo(models.Model):
     creator = models.ForeignKey(User, on_delete=models.CASCADE)
     name_en = models.CharField(max_length=50, unique=True)
@@ -50,6 +38,9 @@ def make_shell_command(sender, created, instance, **kwargs):
         cmd = f"docker run -d -v /tmp/{config_name}:db/db.json -p {port}:80 --name {name}" \
             " cr.isfahan.ir/ir.isfahan.db2rest:400.1.18"
         instance.shell_command = cmd
+
+        if not instance.status_url.startswith('/'):
+            instance.status_url = '/' + instance.status_url
         instance.save()
 
 
@@ -61,3 +52,6 @@ class QueryMethod(models.Model):
 
     created_date = models.DateTimeField(default=timezone.now)
     changed_date = models.DateTimeField(null=True)
+
+    class Meta:
+        unique_together = (("parent_db", "name"),)

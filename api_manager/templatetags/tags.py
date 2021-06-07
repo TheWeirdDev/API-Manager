@@ -12,3 +12,8 @@ def count_running(things):
 @register.filter
 def count_stopped(things):
     return things.filter(Q(docker_id="") | Q(docker_id=None)).count()
+
+
+@register.simple_tag
+def define(val=None):
+    return val
