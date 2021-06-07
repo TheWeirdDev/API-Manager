@@ -10,7 +10,6 @@
         <div class="columns is-centered">
             <div class="column is-three-quarters-desktop">
                 <form class="box" method="POST">
-
                     {% if form.errors %}
                     <div class="notification is-danger is-light">
                         <p>There were some errors in the information you entered. Please correct the following:</p>
@@ -25,6 +24,14 @@
                     {% endif %}
 
                     <h3 class="title is-3">
+                        {%- comment -%}
+                        <!--
+                            database id is only provided when editing the database
+                            we can differentiate between adding and editing modes
+                            by looking for this parameter,
+                        -->
+                        {%- endcomment -%}
+
                         {% if  view.kwargs.database_id  %}
                         Edit Database
                         {% else %}
@@ -102,6 +109,11 @@
                         </div>
                     </div>
 
+                    {%- comment -%}
+                    <!--
+                        Only show the shell command textarea when user is editing the database
+                    -->
+                    {%- endcomment -%}
                     {% if  view.kwargs.database_id  %}
                     <div class="field">
                         <label class="label" for="{{ form.shell_command.id_for_label }}">Shell Command:</label>

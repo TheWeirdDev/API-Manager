@@ -30,15 +30,23 @@ class DatabaseInfo(models.Model):
 
 @receiver(post_save, sender=DatabaseInfo)
 def make_shell_command(sender, created, instance, **kwargs):
+    """
+    This function is called after creating a DatabaseInfo object
+    and generates a shell command for it. This only happens once
+    when the object is created, so if you change other fields manually
+    you should change shell command too accordingly
+    """
     if created:
         name = instance.name_en
         port = instance.port_number
         config_name = instance.config_file_name
 
+        # This is a template for the shell command.
         cmd = f"docker run -d -v /tmp/{config_name}:db/db.json -p {port}:80 --name {name}" \
             " cr.isfahan.ir/ir.isfahan.db2rest:400.1.18"
         instance.shell_command = cmd
 
+        # Make sure status url starts with '/'
         if not instance.status_url.startswith('/'):
             instance.status_url = '/' + instance.status_url
         instance.save()
@@ -54,4 +62,5 @@ class QueryMethod(models.Model):
     changed_date = models.DateTimeField(null=True)
 
     class Meta:
+        # Database can't have two methods with the same name
         unique_together = (("parent_db", "name"),)

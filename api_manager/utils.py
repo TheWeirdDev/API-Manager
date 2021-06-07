@@ -8,11 +8,22 @@ import time
 
 
 def prepare_db_config(db):
+    """
+    Preapares the database config file to be used in a container
+    The config will be saved in /tmp/ if it's not already saved.
+    """
     with open(f"/tmp/{db.config_file_name}", 'w') as f:
         f.write(generate_json(db))
 
 
 def run_command(cmd):
+    """
+    Runs the shell command to start a database api
+
+    the docker process will print a docker id,
+    and it will be captured and saved.
+    The program will use this id to check the status of the container.
+    """
     try:
         process = subprocess.run(
             cmd.split(), stdout=subprocess.PIPE)
@@ -25,6 +36,10 @@ def run_command(cmd):
 
 
 def check_docker_daemon():
+    """
+    Check if the docker service is running by simply calling `from_env` function
+    If the service is not running, a DockerException will be raised
+    """
     try:
         client = docker.from_env()
         return client is not None
@@ -32,16 +47,38 @@ def check_docker_daemon():
         return False
 
 
-def stop_docker(docker_id):
+def check_container_exists(docker_id):
+    """
+    Given a docker id, this function returns a boolean
+    corresponding to the existance of that container.
+    The result is only 'True' if the container is running
+    """
+    try:
+        client = docker.from_env()
+        container = client.containers.get(docker_id)
+        return container is not None and container.status == 'running'
+    except (DockerException, NotFound, ContainerError) as e:
+        return False
+
+
+def stop_docker_container(docker_id):
+    """
+    Stops a docker container and returns 'True' if the opeation
+    was successful
+    """
     try:
         client = docker.from_env()
         client.containers.get(docker_id).stop()
         return True
-    except (DockerExceptionm, NotFound, ContainerError) as e:
+    except (DockerException, NotFound, ContainerError) as e:
         return False
 
 
 def check_status(db):
+    """
+    Checks the health of a database api by calling the 'status_url'
+    of that container, if the result code is 200, then it's healthy
+    """
     try:
         url = f"http://127.0.0.1:{db.port_number}{db.status_url}"
         http_req = urllib.request.urlopen(url, timeout=3)
@@ -51,8 +88,16 @@ def check_status(db):
 
 
 def generate_json(db):
+    """
+    Generates a json config for the database api
+    """
+
+    # Make a dictionary of the query methods for the database
     methods_dict = {i.name: i.query_text for i in db.querymethod_set.all()}
+    # Split each method name and query into a new dictionary
+    # then add each of them to a list
     methods = [{name: query} for name, query in methods_dict.items()]
+
     config = {
         'server': db.server_ip,
         'database': db.db_name,

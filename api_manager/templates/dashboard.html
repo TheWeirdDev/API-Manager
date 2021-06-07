@@ -13,7 +13,7 @@
             <div class="column">
                 <div class="card">
                     <div class="card-header">
-                        <p class="card-header-title">Databse APIs</p>
+                        <p class="card-header-title">Database APIs</p>
                     </div>
                     <div class="card-content">
                         <div class="content title is-4">{{user.databaseinfo_set.count}}</div>
@@ -65,7 +65,7 @@
                 </div>
             </div>
         </div>
-
+        <!-- Generate a table for showing all user databases -->
         {% if user.databaseinfo_set.all %}
         <div class="table-container">
             <table class="table is-fullwidth is-striped is-bordered">
@@ -127,6 +127,7 @@
 
 {% block scripts %}
 <script type="text/javascript">
+    // Notify the user if docker is not running
     if ("{{docker_ok}}" == "False")
         setNotification("Docker service is not running!");
 </script>

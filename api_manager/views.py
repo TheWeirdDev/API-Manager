@@ -11,6 +11,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import auth_login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
+from django.db.models import Q
+from django.db.models.functions import Length
 
 from .forms import SignUpForm, DatabaseForm, MethodForm, SearchForm
 from .models import DatabaseInfo, QueryMethod
@@ -22,6 +24,8 @@ LOGIN_URL = '/login/'
 
 class HomePage(View):
     def dispatch(self, request, *args, **kwargs):
+        # Home page is the same as dashboard for a logged in user
+        # If the user isn't logged in, redirect it to the login page
         if request.user.is_authenticated:
             return redirect('dashboard')
         else:
@@ -34,6 +38,18 @@ class Dashboard(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Get a list of the databases that are running
+        running_dbs = DatabaseInfo.objects.annotate(
+            text_len=Length('docker_id')).filter(Q(creator=self.request.user) & Q(text_len__gt=0))
+        # Mark a database as 'stopped' if the docker id is invalid
+        for db in running_dbs:
+            if not check_container_exists(db.docker_id):
+                db.docker_id = ""
+                db.health = False
+                db.save()
+        # docker_ok variable will be used in template to show a notification
+        # if docker service is not running
         context['docker_ok'] = check_docker_daemon()
         return context
 
@@ -44,11 +60,16 @@ class DatabaseEdit(LoginRequiredMixin, FormView):
     login_url = LOGIN_URL
 
     def get_success_url(self):
+        # if 'database_id' is present, then we are in editing mode,
+        # otherwise we are in 'add database' page
+        # After adding a new database, we would want to go back to the dashboard,
+        # but after editing one, we would want to see it's page
         if 'database_id' in self.kwargs:
             return reverse('database', kwargs={'database_id': self.database.pk})
         return reverse('dashboard')
 
     def get_form(self):
+        # Form class is populated with data if we are editing a database
         if 'database_id' in self.kwargs:
             self.database = get_object_or_404(
                 DatabaseInfo, pk=self.kwargs.get('database_id'))
@@ -58,9 +79,12 @@ class DatabaseEdit(LoginRequiredMixin, FormView):
     def form_valid(self, form):
         database = form.save(commit=False)
 
+        # If database doesn't have 'creator' property, it has just been created,
+        # Otherwise it was changed, so we should update the 'changed_date' field
         if not hasattr(database, 'creator'):
             database.creator = self.request.user
         else:
+            # Shell command should have this prefix, otherwise we'll not get a docker id
             PREFIX = 'docker run -d'
             if not database.shell_command.startswith(PREFIX):
                 form.add_error('shell_command',
@@ -79,16 +103,19 @@ class MethodEdit(LoginRequiredMixin, FormView):
 
     def get_initial(self):
         initial = super().get_initial()
+        # Save the parent database of this method so we can redirect to it
         self.database = get_object_or_404(
             DatabaseInfo, pk=self.kwargs['database_id'])
         initial['database'] = self.database
         return initial
 
     def get_form(self):
+        # if 'method_id' is present, then we are in editing mode,
+        # and need to populate the form with method name and query
         if 'method_id' in self.kwargs:
-            self.database = get_object_or_404(
+            self.method = get_object_or_404(
                 QueryMethod, pk=self.kwargs.get('method_id'))
-            return self.form_class(instance=self.database, **self.get_form_kwargs())
+            return self.form_class(instance=self.method, **self.get_form_kwargs())
         return self.form_class(**self.get_form_kwargs())
 
     def get_success_url(self):
@@ -96,12 +123,15 @@ class MethodEdit(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         method = form.save(commit=False)
+        # If QueryMethod doesn't have 'creator' property, it has just been created,
+        # Otherwise it was changed, so we should update the 'changed_date' field
         if not hasattr(method, 'creator'):
             method.creator = self.request.user
             method.parent_db = self.database
         else:
             method.changed_date = timezone.now()
 
+        # Save the method, only if it's name is uniqe in the same database
         try:
             method.save()
         except IntegrityError:
@@ -119,21 +149,34 @@ class DatabaseView(LoginRequiredMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         self.database = get_object_or_404(
             DatabaseInfo, pk=self.kwargs['database_id'])
+        # Check if it is actually running
+        if not check_container_exists(self.database.docker_id):
+            self.database.docker_id = ""
+            self.database.health = False
+            self.database.save()
         context['database'] = self.database
         return context
 
 
 @login_required(login_url=LOGIN_URL)
 def delete_database(request, database_id):
+    """
+    Delete a database by providing the database id
+    only the creator can delete the database
+    """
     db = get_object_or_404(DatabaseInfo, pk=database_id)
     if request.user != db.creator:
         return redirect(reverse('edit_db', kwargs={'database_id': database_id}))
     db.delete()
-    return redirect(reverse('dashboard'))
+    return redirect('dashboard')
 
 
 @login_required(login_url=LOGIN_URL)
 def delete_method(request, database_id, method_id):
+    """
+    Delete a query method by specifying the method id
+    only the creator can delete the database
+    """
     method = get_object_or_404(QueryMethod, pk=method_id)
     if request.user != method.creator:
         return redirect(reverse('database', kwargs={'database_id': database_id}))
@@ -143,16 +186,23 @@ def delete_method(request, database_id, method_id):
 
 @login_required(login_url=LOGIN_URL)
 def search_view(request):
+    """
+    Search through database by specifying the category and search query
+    """
     if request.method == 'POST':
         form = SearchForm(request.POST)
         if form.is_valid():
             is_method = False
+            # Get query and category from the form
             query = form.cleaned_data.get('search_query')
             category = form.cleaned_data.get("category")
+            # If category is method name, then search methods and render a table for them
+            # Otherwise render a table for databases
             if category == "method_name":
                 items = QueryMethod.objects.filter(name__contains=query)
                 is_method = True
             else:
+                # filter by category
                 items = DatabaseInfo.objects.filter(
                     **{f'{category}__contains': query}
                 )
@@ -163,14 +213,16 @@ def search_view(request):
 
 
 def signup(request):
+    """
+    The signup view renders the signup page and then processes the form
+    """
     if request.method == 'POST':
         form = SignUpForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Load the profile instance that was created by the signal
-            user.refresh_from_db()
             user.save()
             raw_password = form.cleaned_data.get('password1')
+            # Login automatically after signup
             user = authenticate(username=user.username, password=raw_password)
             login(request, user)
             return redirect('dashboard')
@@ -181,10 +233,14 @@ def signup(request):
 
 @login_required(login_url=LOGIN_URL)
 def generate_json_config(request, database_id):
+    """
+    Generates a config file for a database and lets the user download the file
+    """
     db = DatabaseInfo.objects.get(pk=database_id)
     config = generate_json(db)
     response = HttpResponse(
         content_type='text/json',
+        # Make the config gile downloadable
         headers={
             'Content-Disposition': f'attachment; filename="{db.config_file_name}"',
             'Content-Length': len(config)
@@ -196,6 +252,10 @@ def generate_json_config(request, database_id):
 
 @login_required(login_url=LOGIN_URL)
 def run_api(request, database_id):
+    """
+    Runs the docker shell command for the database
+    and checks the health and the status of the container
+    """
     database = get_object_or_404(DatabaseInfo, pk=database_id)
     if database.docker_id != "":
         return JsonResponse({'error': "API is already running"})
@@ -209,6 +269,7 @@ def run_api(request, database_id):
         database.docker_id = docker_id
         database.save()
         resp['running'] = True
+        # Opening the status url should give the status code 200
         if check_status(database) == 200:
             resp['health_ok'] = True
             database.health = True
@@ -218,10 +279,13 @@ def run_api(request, database_id):
 
 @login_required(login_url=LOGIN_URL)
 def stop_api(request, database_id):
+    """
+    Stops the api container and clears database info field
+    """
     database = get_object_or_404(DatabaseInfo, pk=database_id)
     if database.docker_id == "":
         return JsonResponse({'error': "API is not running"})
-    if stop_docker(database.docker_id):
+    if stop_docker_container(database.docker_id):
         database.docker_id = ""
         database.health = False
         database.save()
@@ -232,6 +296,10 @@ def stop_api(request, database_id):
 
 @login_required(login_url=LOGIN_URL)
 def check_health(request, database_id):
+    """
+    Checks the health of a database api by opening the status url
+    and then updates the database object
+    """
     database = get_object_or_404(DatabaseInfo, pk=database_id)
     if database.docker_id == "":
         return JsonResponse({'error': 'API is not running'})
