@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.views.generic import TemplateView, View
 from django.views.generic.edit import FormView
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
+from django.utils import timezone, dateformat
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import auth_login
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -14,9 +14,11 @@ from django.db import IntegrityError
 from django.db.models import Q
 from django.db.models.functions import Length
 
+import csv
+
 from .forms import SignUpForm, DatabaseForm, MethodForm, SearchForm
 from .models import DatabaseInfo, QueryMethod
-
+from .templatetags.tags import get_running, get_stopped
 from .utils import *
 
 LOGIN_URL = '/login/'
@@ -90,6 +92,8 @@ class DatabaseEdit(LoginRequiredMixin, FormView):
                 form.add_error('shell_command',
                                f'Shell command has to star with "{PREFIX}"')
                 return super(DatabaseEdit, self).form_invalid(form)
+            # Remove unwanted newlines
+            database.shell_command = database.shell_command.replace('\n', '')
             database.changed_date = timezone.now()
 
         database.save()
@@ -212,6 +216,57 @@ def search_view(request):
         return render(request, 'search.html', {'form': form, 'is_get': True})
 
 
+@login_required(login_url=LOGIN_URL)
+def stats_view(request):
+    """
+    Show total APIs and methods. Allow the user to print or download the results
+    """
+
+    all_dbs = DatabaseInfo.objects.all()
+
+    def get_data_for_category(category):
+        if category == "all_methods":
+            items = QueryMethod.objects.all()
+        elif category == "all_dbs":
+            items = all_dbs
+        elif category == "running":
+            items = get_running(all_dbs)
+        elif category == "stopped":
+            items = get_stopped(all_dbs)
+        return items
+
+    if request.method == 'POST':
+        download_csv_category = request.POST.get('download_csv', None)
+        if download_csv_category:
+            date_now = dateformat.format(timezone.now(), 'Y-m-d_H-i-s')
+            response = HttpResponse(
+                content_type='text/csv',
+                headers={
+                    'Content-Disposition':
+                        f'attachment; filename="report-{download_csv_category}_{date_now}.csv"'},
+            )
+            writer = csv.writer(response)
+            items = get_data_for_category(download_csv_category)
+            if download_csv_category == 'all_methods':
+                write_method_csv(writer, items)
+            else:
+                write_db_csv(writer, items)
+            return response
+
+        elif request.POST.get('print_results', None):
+            # Todo: create print page
+            return HttpResponse("Print results")
+        else:
+            category = request.POST['category']
+            is_method = category == 'all_methods'
+            items = get_data_for_category(category)
+            return render(request, 'stats.html', {'items': items, 'is_method': is_method,
+                                                  'selected_category': category})
+    else:
+        return render(request, 'stats.html', {'items': all_dbs, 'is_method': False,
+                                              'selected_category': 'all_dbs'})
+
+
 def signup(request):
     """
     The signup view renders the signup page and then processes the form
@@ -263,9 +318,12 @@ def run_api(request, database_id):
     # Make sure db config file exists
     prepare_db_config(database)
 
-    docker_id = run_command(database.shell_command)
-    resp = {'running': False, 'docker_id': docker_id, 'health_ok': False}
-    if docker_id != "" and docker_id != None:
+    docker_id, error_message = run_command(database.shell_command)
+
+    resp = {'running': False, 'docker_id': docker_id,
+            'health_ok': False, 'error_message': error_message}
+
+    if docker_id not in ("", None):
         database.docker_id = docker_id
         database.save()
         resp['running'] = True

@@ -46,8 +46,8 @@
                     <table class="table is-fullwidth is-striped is-bordered">
                         <thead class="has-background-info-light">
                             <tr>
-                                <th>Name (EN)</th>
-                                <th>Name (FA)</th>
+                                <th>Project Name (EN)</th>
+                                <th>Project Name (FA)</th>
                                 <th>Server Name</th>
                                 <th>Server IP</th>
                                 <th>Port</th>
@@ -164,7 +164,7 @@
                 if (data.docker_id != "" && data.running) {
                     location.reload();
                 } else {
-                    setNotification("Can't start API");
+                    setNotification("Can't start API: </br>" + data.error_message);
                 }
             },
             error: function (data) {
@@ -189,7 +189,10 @@
                 } else {
                     location.reload();
                 }
-            }
+            },
+            error: function (data) {
+                setNotification("Can't stop API");
+            },
         });
     });
 </script>

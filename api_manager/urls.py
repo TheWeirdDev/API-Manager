@@ -30,4 +30,6 @@ urlpatterns = [
          views.check_health, name='check_health'),
     path('dashboard/search/',
          views.search_view, name='search'),
+    path('dashboard/stats/',
+         views.stats_view, name='stats'),
 ]

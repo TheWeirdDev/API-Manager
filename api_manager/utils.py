@@ -23,16 +23,26 @@ def run_command(cmd):
     the docker process will print a docker id,
     and it will be captured and saved.
     The program will use this id to check the status of the container.
+
+    The return value of this function is a tuple,
+    the first item of which is the docker id and
+    the second item is the error message (if any)
     """
     try:
         process = subprocess.run(
-            cmd.split(), stdout=subprocess.PIPE)
+            cmd.split(),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
         time.sleep(1)
+        # The output will be either the docker id or error message based on the error code
+        # If there was an error, docker id should be `None`
         if process.returncode > 0:
-            return None
-        return process.stdout.decode("utf-8").strip()
+            return (None, process.stderr.decode("utf-8").strip())
+        # If it was successful, error message should be `None`
+        return (process.stdout.decode("utf-8").strip(), None)
     except:
-        return None
+        return (None, process.stderr.decode("utf-8").strip())
 
 
 def check_docker_daemon():
@@ -106,3 +116,34 @@ def generate_json(db):
         'methods': methods
     }
     return json.dumps(config)
+
+
+def write_method_csv(writer, items):
+    writer.writerow(['Project Name (EN)',
+                     'Project Name (FA)',
+                     'Database',
+                     'Method Name',
+                     'Query', ])
+    for i in items:
+        db = i.parent_db
+        writer.writerow(
+            [db.name_en, db.name_fa, db.db_name, i.name, i.query_text])
+
+
+def write_db_csv(writer, items):
+    writer.writerow(['Project Name (EN)',
+                     'Project Name (FA)',
+                     'Server Name',
+                     'Server IP',
+                     'Port',
+                     'Database',
+                     'DB Username',
+                     'DB Password',
+                     'Shell Command',
+                     'Health',
+                     'Running', ])
+    for i in items:
+        running = i.docker_id != ""
+        health = i.health if running else ""
+        writer.writerow([i.name_en, i.name_fa, i.server_name, i.server_ip, i.port_number, i.db_name,
+                         i.db_username, i.db_password, i.shell_command, health, running])
