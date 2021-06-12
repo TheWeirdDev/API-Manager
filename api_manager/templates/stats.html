@@ -96,6 +96,7 @@
                         </div>
                     </div>
                     <div class="level-right">
+                        {% if items %}
                         <div class="level-item">
                             <form method="POST">
                                 {% csrf_token %}
@@ -114,10 +115,16 @@
                                 </button>
                             </form>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
-                {% if items %}
+                {% if items.count == 0 %}
+                <div class="notification is-info is-light" style="border: 1px dashed #22bbff;">
+                    No results
+                </div>
+                {% endif %}
 
+                {% if items %}
                 {% if is_method %}
                 <div class="table-container">
                     <table class="table is-fullwidth is-striped is-bordered">

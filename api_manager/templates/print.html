@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'api_manager/bulma.min.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>API Management System</title>
+</head>
+
+<body>
+    <div class="has-background-light">
+        <main>
+            <div class="columns">
+                <div class="column is-four-fifths container" style="min-height: 100vh;">
+                    {% if items.count == 0 %}
+                    <div class="notification is-info is-light" style="border: 1px dashed #22bbff;">
+                        No results
+                    </div>
+                    {% endif %}
+                    {% if items %}
+                    {% if is_method %}
+                    <div class="table-container">
+                        <table class="table is-fullwidth is-striped is-bordered">
+                            <thead class="has-background-info-light">
+                                <tr>
+                                    <th>Project (EN)</th>
+                                    <th>Project (FA)</th>
+                                    <th>Database</th>
+                                    <th>Method Name</th>
+                                    <th>Query</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for method in items %}
+                                <tr>
+                                    <td>{{ method.parent_db.name_en }}</td>
+                                    <td>{{ method.parent_db.name_fa }}</td>
+                                    <td>{{ method.parent_db.db_name }}</td>
+                                    <td>{{method.name}}</td>
+                                    <td>{{method.query_text}}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+
+                    <div class="table-container">
+                        <table class="table is-fullwidth is-striped is-bordered">
+                            <thead class="has-background-info-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Project Name (EN)</th>
+                                    <th>Project Name (FA)</th>
+                                    <th>Server Name</th>
+                                    <th>Server IP</th>
+                                    <th>Port</th>
+                                    <th>Database</th>
+                                    <th>DB Username</th>
+                                    <th>DB Password</th>
+                                    <th>Shell Command</th>
+                                    <th>Health</th>
+                                    <th>Running</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for db_info in items %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{db_info.name_en}}</td>
+                                    <td>{{db_info.name_fa}}</td>
+                                    <td>{{db_info.server_name}}</td>
+                                    <td>{{db_info.server_ip}}</td>
+                                    <td>{{db_info.port_number}}</td>
+                                    <td>{{db_info.db_name}}</td>
+                                    <td>{{db_info.db_username}}</td>
+                                    <td>{{db_info.db_password}}</td>
+                                    <td>{{db_info.shell_command}}</td>
+                                    <td>
+                                        {% if db_info.docker_id != "" %}
+                                        {% if db_info.health %}
+                                        <div class="tag is-success">GOOD</div>
+                                        {% else %}
+                                        <div class="tag is-damger">BAD</div>
+                                        {% endif %}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if db_info.docker_id != "" %}
+                                        <div class="tag is-success">YES</div>
+                                        {% else %}
+                                        <div class="tag is-danger">NO</div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+</html>

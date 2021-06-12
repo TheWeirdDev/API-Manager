@@ -225,6 +225,9 @@ def stats_view(request):
     all_dbs = DatabaseInfo.objects.all()
 
     def get_data_for_category(category):
+        """
+        Helper function for getting different categories from the database
+        """
         if category == "all_methods":
             items = QueryMethod.objects.all()
         elif category == "all_dbs":
@@ -236,6 +239,7 @@ def stats_view(request):
         return items
 
     if request.method == 'POST':
+        # download_csv is only present if 'Download report' button was clicked
         download_csv_category = request.POST.get('download_csv', None)
         if download_csv_category:
             date_now = dateformat.format(timezone.now(), 'Y-m-d_H-i-s')
@@ -253,15 +257,21 @@ def stats_view(request):
                 write_db_csv(writer, items)
             return response
 
-        elif request.POST.get('print_results', None):
-            # Todo: create print page
-            return HttpResponse("Print results")
-        else:
-            category = request.POST['category']
-            is_method = category == 'all_methods'
-            items = get_data_for_category(category)
-            return render(request, 'stats.html', {'items': items, 'is_method': is_method,
-                                                  'selected_category': category})
+        # Similarly, print_category is present when 'Print' was clicked
+        print_category = request.POST.get('print_results', None)
+        if print_category:
+            items = get_data_for_category(print_category)
+            is_method = False
+            if print_category == 'all_methods':
+                is_method = True
+            return render(request, 'print.html', {'items': items, 'is_method': is_method})
+
+        # If those buttons were not clicked, just show the results
+        category = request.POST['category']
+        is_method = category == 'all_methods'
+        items = get_data_for_category(category)
+        return render(request, 'stats.html', {'items': items, 'is_method': is_method,
+                                              'selected_category': category})
     else:
         return render(request, 'stats.html', {'items': all_dbs, 'is_method': False,
                                               'selected_category': 'all_dbs'})
