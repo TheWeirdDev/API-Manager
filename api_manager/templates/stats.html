@@ -7,7 +7,7 @@
 <section class="section">
     <div class="container">
         <div class="columns is-centered">
-            <div class="column is-three-quarters-desktop">
+            <div class="column is-four-fifths-desktop">
                 <div class="columns">
                     <div class="column">
                         <div class="card">
@@ -130,6 +130,7 @@
                     <table class="table is-fullwidth is-striped is-bordered">
                         <thead class="has-background-info-light">
                             <tr>
+                                <th>#</th>
                                 <th>Project (EN)</th>
                                 <th>Project (FA)</th>
                                 <th>Database</th>
@@ -140,6 +141,7 @@
                         <tbody>
                             {% for method in items %}
                             <tr>
+                                <td>{{ forloop.counter }}</td>
                                 <td>{{ method.parent_db.name_en }}</td>
                                 <td>{{ method.parent_db.name_fa }}</td>
                                 <td>{{ method.parent_db.db_name }}</td>

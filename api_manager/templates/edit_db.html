@@ -8,7 +8,7 @@
 <section class="section">
     <div class="container">
         <div class="columns is-centered">
-            <div class="column is-three-quarters-desktop">
+            <div class="column is-four-fifths-desktop">
                 <form class="box" method="POST">
                     {% if form.errors %}
                     <div class="notification is-danger is-light">
@@ -139,9 +139,11 @@
                     <div class="level">
                         <div class="level-left">
                             {% if  view.kwargs.database_id  %}
-                            <a class="button is-danger" href="{% url 'delete_db' view.kwargs.database_id %}">
-                                Delete Database
-                            </a>
+                            <div class="level-item">
+                                <a class="button is-danger" href="{% url 'delete_db' view.kwargs.database_id %}">
+                                    Delete Database
+                                </a>
+                            </div>
                             {% endif %}
                         </div>
                         <div class="level-right">

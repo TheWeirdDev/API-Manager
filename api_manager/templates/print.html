@@ -6,25 +6,53 @@
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'api_manager/bulma.min.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <title>API Management System</title>
+    <title>Report</title>
+    <style>
+        table {
+            font-size: 1.2vw;
+        }
+    </style>
 </head>
 
 <body>
     <div class="has-background-light">
         <main>
-            <div class="columns">
-                <div class="column is-four-fifths container" style="min-height: 100vh;">
+            <div class="columns is-centered">
+                <div class="column is-11" style="min-height: 100vh;">
+                    <div class="container columns mt-4 has-text-centered" style="font-size: 1.4vw;">
+                        <div class="column">
+                            <span class="has-text-weight-bold">Report type:</span>
+                            {% if category == 'all_methods' %}
+                            All Query Methods
+                            {% elif category == 'all_dbs' %}
+                            All Database APIs
+                            {% elif category == 'running' %}
+                            Running APIs
+                            {% elif category == 'stopped' %}
+                            Stopped APIs
+                            {% endif %}
+                        </div>
+                        <div class="column">
+                            <span class="has-text-weight-bold">Date:</span>
+                            {% now "d/m/Y P" %}
+                        </div>
+                        <div class="column">
+                            <span class="has-text-weight-bold">Count:</span>
+                            {{ items.count }} Items
+                        </div>
+                    </div>
                     {% if items.count == 0 %}
                     <div class="notification is-info is-light" style="border: 1px dashed #22bbff;">
                         No results
                     </div>
                     {% endif %}
                     {% if items %}
-                    {% if is_method %}
+                    {% if category == 'all_methods' %}
                     <div class="table-container">
                         <table class="table is-fullwidth is-striped is-bordered">
                             <thead class="has-background-info-light">
                                 <tr>
+                                    <th>#</th>
                                     <th>Project (EN)</th>
                                     <th>Project (FA)</th>
                                     <th>Database</th>
@@ -35,6 +63,7 @@
                             <tbody>
                                 {% for method in items %}
                                 <tr>
+                                    <td>{{ forloop.counter }}</td>
                                     <td>{{ method.parent_db.name_en }}</td>
                                     <td>{{ method.parent_db.name_fa }}</td>
                                     <td>{{ method.parent_db.db_name }}</td>
@@ -105,6 +134,11 @@
             </div>
         </main>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            window.print();
+        });
+    </script>
 </body>
 
 </html>

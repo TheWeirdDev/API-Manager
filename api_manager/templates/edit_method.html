@@ -8,7 +8,7 @@
 <section class="section is-fullheight-with-navbar">
     <div class="container">
         <div class="columns is-centered">
-            <div class="column is-three-quarters-desktop">
+            <div class="column is-four-fifths-desktop">
                 <form class="box" method="POST">
                     {% if form.errors %}
                     <div class="notification is-danger is-light">
@@ -47,10 +47,12 @@
                     <div class="level">
                         <div class="level-left">
                             {% if  view.kwargs.method_id  %}
-                            <a class="button is-danger"
-                                href="{% url 'delete_method' view.kwargs.database_id view.kwargs.method_id %}">
-                                Delete Method
-                            </a>
+                            <div class="level-item">
+                                <a class="button is-danger"
+                                    href="{% url 'delete_method' view.kwargs.database_id view.kwargs.method_id %}">
+                                    Delete Method
+                                </a>
+                            </div>
                             {% endif %}
                         </div>
                         <div class="level-right">

@@ -261,10 +261,7 @@ def stats_view(request):
         print_category = request.POST.get('print_results', None)
         if print_category:
             items = get_data_for_category(print_category)
-            is_method = False
-            if print_category == 'all_methods':
-                is_method = True
-            return render(request, 'print.html', {'items': items, 'is_method': is_method})
+            return render(request, 'print.html', {'items': items, 'category': print_category})
 
         # If those buttons were not clicked, just show the results
         category = request.POST['category']
