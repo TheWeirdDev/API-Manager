@@ -78,7 +78,7 @@ def stop_docker_container(docker_id):
     """
     try:
         client = docker.from_env()
-        client.containers.get(docker_id).stop()
+        client.containers.get(docker_id).stop(timeout=5)
         return True
     except (DockerException, NotFound, ContainerError) as e:
         return False

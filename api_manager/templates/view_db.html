@@ -145,10 +145,6 @@
             dataType: 'json',
             url: "{% url 'check_health' database.pk %}",
             success: function (data) {
-                if (data.error) {
-                    setNotification(data.error);
-                    return;
-                }
                 location.reload();
             },
             error: function (data) {

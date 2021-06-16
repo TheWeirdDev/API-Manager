@@ -42,7 +42,7 @@ def make_shell_command(sender, created, instance, **kwargs):
         config_name = instance.config_file_name
 
         # This is a template for the shell command.
-        cmd = f"docker run -d -v /tmp/{config_name}:/db/db.json -p {port}:80 --name {name}" \
+        cmd = f"docker run -d --rm -v /tmp/{config_name}:/db/db.json -p {port}:80 --name {name}" \
             " cr.isfahan.ir/ir.isfahan.db2rest:400.1.18"
         instance.shell_command = cmd
 

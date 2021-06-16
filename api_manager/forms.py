@@ -23,6 +23,8 @@ class SearchForm(forms.Form):
     categories = (('name_en', "Project Name (EN)"),
                   ('name_fa', 'Project Name (FA)'),
                   ('db_name', 'Database Name'),
+                  ('db_username', 'Database Username'),
+                  ('db_password', 'Database Password'),
                   ('method_name', 'Method Name '),
                   ('server_name', 'Server Name '),
                   ('server_ip', 'Server IP'),
