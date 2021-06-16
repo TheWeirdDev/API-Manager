@@ -5,6 +5,7 @@ import docker
 from docker.errors import DockerException, NotFound, ContainerError
 import json
 import time
+import socket
 
 
 def prepare_db_config(db):
@@ -92,8 +93,9 @@ def check_status(db):
     try:
         url = f"http://127.0.0.1:{db.port_number}{db.status_url}"
         http_req = urllib.request.urlopen(url, timeout=3)
-    except urllib.error.URLError:
-        return -1
+    except (urllib.error.URLError, socket.timeout) as e:
+        print("Error: ", e)
+        return - 1
     return http_req.getcode()
 
 

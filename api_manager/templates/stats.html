@@ -4,213 +4,209 @@
 {% include "includes/sidebar.html" with active_tab="stats" %}
 {% endblock sidebar %}
 {% block content %}
-<section class="section">
-    <div class="container">
-        <div class="columns is-centered">
-            <div class="column is-four-fifths">
-                <div class="columns is-mobile is-multiline">
-                    <div class="column is-half-mobile">
-                        <div class="card" style="height: 100%;">
-                            <div class="card-header">
-                                <p class="card-header-title">Total Database APIs</p>
-                            </div>
-                            <div class="card-content">
-                                <div class="content title is-4">{{dbs_count}}</div>
-                            </div>
-                        </div>
+<div class="columns is-centered">
+    <div class="column is-four-fifths">
+        <div class="columns is-mobile is-multiline">
+            <div class="column is-half-mobile">
+                <div class="card" style="height: 100%;">
+                    <div class="card-header">
+                        <p class="card-header-title">Total Database APIs</p>
                     </div>
-                    <div class="column is-half-mobile">
-                        <div class="card" style="height: 100%;">
-                            <div class="card-header">
-                                <p class="card-header-title">Total Query Methods</p>
-                            </div>
-                            <div class="card-content">
-                                <div class="content title is-4">{{methods_count}}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="column is-half-mobile">
-                        <div class="card" style="height: 100%;">
-                            <div class="card-header ">
-                                <p class="card-header-title">Total Running</p>
-                            </div>
-                            <div class="card-content">
-                                <div class="content title is-4">{{ running_count }}</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="column is-half-mobile">
-                        <div class="card" style="height: 100%;">
-                            <div class="card-header">
-                                <p class="card-header-title">Total Stopped</p>
-                            </div>
-                            <div class="card-content">
-                                <div class="content title is-4">{{ stopped_count }}</div>
-                            </div>
-                        </div>
+                    <div class="card-content">
+                        <div class="content title is-4">{{dbs_count}}</div>
                     </div>
                 </div>
-
-                <div class="level">
-                    <div class="level-left">
-                        <div class="level-item">
-                            <form method="POST">
-                                <div class="field has-addons">
-                                    {% csrf_token %}
-                                    <p class="control">
-                                        <span class="select">
-                                            <select name="category" id="category">
-                                                <option value="all_dbs" {% if selected_category == 'all_dbs' %} selected
-                                                    {% endif %}>
-                                                    All Databases
-                                                </option>
-                                                <option value="all_methods" {% if selected_category == 'all_methods' %}
-                                                    selected {% endif %}>
-                                                    All Methods
-                                                </option>
-                                                <option value="running" {% if selected_category == 'running' %} selected
-                                                    {% endif %}>
-                                                    Running
-                                                </option>
-                                                <option value="stopped" {% if selected_category == 'stopped' %} selected
-                                                    {% endif %}>
-                                                    Stopped
-                                                </option>
-                                            </select>
-                                        </span>
-                                    </p>
-                                    <p class="control">
-                                        <button class="button" type="submit">
-                                            <span>Show</span>
-                                        </button>
-                                    </p>
-                                </div>
-                            </form>
-                        </div>
+            </div>
+            <div class="column is-half-mobile">
+                <div class="card" style="height: 100%;">
+                    <div class="card-header">
+                        <p class="card-header-title">Total Query Methods</p>
+                    </div>
+                    <div class="card-content">
+                        <div class="content title is-4">{{methods_count}}</div>
                     </div>
                 </div>
-                <div class="level">
-                    <div class="level-left">
-                        <div class="level-item">
-                            <h5 class="title is-4">Results: </h5>
-                        </div>
+            </div>
+            <div class="column is-half-mobile">
+                <div class="card" style="height: 100%;">
+                    <div class="card-header ">
+                        <p class="card-header-title">Total Running</p>
                     </div>
-                    <div class="level-right">
-                        {% if items %}
-                        <div class="level-item">
-                            <form method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" name="download_csv" value="{{selected_category}}">
-                                <button class="button is-info" type="submit">
-                                    <span>Download Report</span>
-                                </button>
-                            </form>
-                        </div>
-                        <div class="level-item">
-                            <form method="POST">
-                                {% csrf_token %}
-                                <input type="hidden" name="print_results" value="{{selected_category}}">
-                                <button class="button is-link" type="submit">
-                                    <span>Print</span>
-                                </button>
-                            </form>
-                        </div>
-                        {% endif %}
+                    <div class="card-content">
+                        <div class="content title is-4">{{ running_count }}</div>
                     </div>
                 </div>
-                {% if items.count == 0 %}
-                <div class="notification is-info is-light" style="border: 1px dashed #22bbff;">
-                    No results
+            </div>
+            <div class="column is-half-mobile">
+                <div class="card" style="height: 100%;">
+                    <div class="card-header">
+                        <p class="card-header-title">Total Stopped</p>
+                    </div>
+                    <div class="card-content">
+                        <div class="content title is-4">{{ stopped_count }}</div>
+                    </div>
                 </div>
-                {% endif %}
-
-                {% if items %}
-                {% if is_method %}
-                <div class="table-container">
-                    <table class="table is-fullwidth is-striped is-bordered">
-                        <thead class="has-background-info-light">
-                            <tr>
-                                <th>#</th>
-                                <th>Project (EN)</th>
-                                <th>Project (FA)</th>
-                                <th>Database</th>
-                                <th>Method Name</th>
-                                <th>Query</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for method in items %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ method.parent_db.name_en }}</td>
-                                <td>{{ method.parent_db.name_fa }}</td>
-                                <td>{{ method.parent_db.db_name }}</td>
-                                <td>{{method.name}}</td>
-                                <td>{{method.query_text}}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% else %}
-
-                <div class="table-container">
-                    <table class="table is-fullwidth is-striped is-bordered">
-                        <thead class="has-background-info-light">
-                            <tr>
-                                <th>#</th>
-                                <th>Project Name (EN)</th>
-                                <th>Project Name (FA)</th>
-                                <th>Server Name</th>
-                                <th>Server IP</th>
-                                <th>Port</th>
-                                <th>Database</th>
-                                <th>DB Username</th>
-                                <th>DB Password</th>
-                                <th>Shell Command</th>
-                                <th>Health</th>
-                                <th>Running</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for db_info in items %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{db_info.name_en}}</td>
-                                <td>{{db_info.name_fa}}</td>
-                                <td>{{db_info.server_name}}</td>
-                                <td>{{db_info.server_ip}}</td>
-                                <td>{{db_info.port_number}}</td>
-                                <td>{{db_info.db_name}}</td>
-                                <td>{{db_info.db_username}}</td>
-                                <td>{{db_info.db_password}}</td>
-                                <td>{{db_info.shell_command}}</td>
-                                <td>
-                                    {% if db_info.docker_id != "" %}
-                                    {% if db_info.health %}
-                                    <div class="tag is-success">GOOD</div>
-                                    {% else %}
-                                    <div class="tag is-damger">BAD</div>
-                                    {% endif %}
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if db_info.docker_id != "" %}
-                                    <div class="tag is-success">YES</div>
-                                    {% else %}
-                                    <div class="tag is-danger">NO</div>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                {% endif %}
-                {% endif %}
-
             </div>
         </div>
+
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item">
+                    <form method="POST">
+                        <div class="field has-addons">
+                            {% csrf_token %}
+                            <p class="control">
+                                <span class="select">
+                                    <select name="category" id="category">
+                                        <option value="all_dbs" {% if selected_category == 'all_dbs' %} selected
+                                            {% endif %}>
+                                            All Databases
+                                        </option>
+                                        <option value="all_methods" {% if selected_category == 'all_methods' %} selected
+                                            {% endif %}>
+                                            All Methods
+                                        </option>
+                                        <option value="running" {% if selected_category == 'running' %} selected
+                                            {% endif %}>
+                                            Running
+                                        </option>
+                                        <option value="stopped" {% if selected_category == 'stopped' %} selected
+                                            {% endif %}>
+                                            Stopped
+                                        </option>
+                                    </select>
+                                </span>
+                            </p>
+                            <p class="control">
+                                <button class="button" type="submit">
+                                    <span>Show</span>
+                                </button>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="level">
+            <div class="level-left">
+                <div class="level-item">
+                    <h5 class="title is-4">Results: </h5>
+                </div>
+            </div>
+            <div class="level-right">
+                {% if items %}
+                <div class="level-item">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="download_csv" value="{{selected_category}}">
+                        <button class="button is-info" type="submit">
+                            <span>Download Report</span>
+                        </button>
+                    </form>
+                </div>
+                <div class="level-item">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="print_results" value="{{selected_category}}">
+                        <button class="button is-link" type="submit">
+                            <span>Print</span>
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% if items.count == 0 %}
+        <div class="notification is-info is-light" style="border: 1px dashed #22bbff;">
+            No results
+        </div>
+        {% endif %}
+
+        {% if items %}
+        {% if is_method %}
+        <div class="table-container">
+            <table class="table is-fullwidth is-striped is-bordered">
+                <thead class="has-background-info-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Project (EN)</th>
+                        <th>Project (FA)</th>
+                        <th>Database</th>
+                        <th>Method Name</th>
+                        <th>Query</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for method in items %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ method.parent_db.name_en }}</td>
+                        <td>{{ method.parent_db.name_fa }}</td>
+                        <td>{{ method.parent_db.db_name }}</td>
+                        <td>{{method.name}}</td>
+                        <td>{{method.query_text}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+
+        <div class="table-container">
+            <table class="table is-fullwidth is-striped is-bordered">
+                <thead class="has-background-info-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Project Name (EN)</th>
+                        <th>Project Name (FA)</th>
+                        <th>Server Name</th>
+                        <th>Server IP</th>
+                        <th>Port</th>
+                        <th>Database</th>
+                        <th>DB Username</th>
+                        <th>DB Password</th>
+                        <th>Shell Command</th>
+                        <th>Health</th>
+                        <th>Running</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for db_info in items %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{db_info.name_en}}</td>
+                        <td>{{db_info.name_fa}}</td>
+                        <td>{{db_info.server_name}}</td>
+                        <td>{{db_info.server_ip}}</td>
+                        <td>{{db_info.port_number}}</td>
+                        <td>{{db_info.db_name}}</td>
+                        <td>{{db_info.db_username}}</td>
+                        <td>{{db_info.db_password}}</td>
+                        <td>{{db_info.shell_command}}</td>
+                        <td>
+                            {% if db_info.docker_id != "" %}
+                            {% if db_info.health %}
+                            <div class="tag is-success">GOOD</div>
+                            {% else %}
+                            <div class="tag is-damger">BAD</div>
+                            {% endif %}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if db_info.docker_id != "" %}
+                            <div class="tag is-success">YES</div>
+                            {% else %}
+                            <div class="tag is-danger">NO</div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+        {% endif %}
+
     </div>
-</section>
+</div>
 {% endblock content %}
