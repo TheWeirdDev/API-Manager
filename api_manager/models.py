@@ -36,6 +36,10 @@ def make_shell_command(sender, created, instance, **kwargs):
     when the object is created, so if you change other fields manually
     you should change shell command too accordingly
     """
+    # Make sure status url starts with '/'
+    if not instance.status_url.startswith('/'):
+        instance.status_url = '/' + instance.status_url
+        instance.save()
     if created:
         name = instance.name_en
         port = instance.port_number
@@ -45,10 +49,6 @@ def make_shell_command(sender, created, instance, **kwargs):
         cmd = f"docker run -d --rm -v /tmp/{config_name}:/db/db.json -p {port}:80 --name {name}" \
             " cr.isfahan.ir/ir.isfahan.db2rest:400.1.18"
         instance.shell_command = cmd
-
-        # Make sure status url starts with '/'
-        if not instance.status_url.startswith('/'):
-            instance.status_url = '/' + instance.status_url
         instance.save()
 
 

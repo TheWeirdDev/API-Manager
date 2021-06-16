@@ -1,8 +1,16 @@
 {% extends "base_main.html" %}
 {% load tags %}
+
 {% block sidebar %}
+
+{% if  my_dbs %}
 {% include "includes/sidebar.html" with active_tab="dashboard" %}
+{% else %}
+{% include "includes/sidebar.html" with active_tab="all_apis" %}
+{% endif %}
+
 {% endblock sidebar %}
+
 {% block content %}
 <div class="columns is-vcentered is-centered">
     <div class="column is-four-fifths" style="margin: 1rem;">
@@ -13,40 +21,60 @@
             <div class="column">
                 <div class="card">
                     <div class="card-header">
-                        <p class="card-header-title">Database APIs</p>
+                        <p class="card-header-title">
+                            {% if not my_dbs %}
+                            Total
+                            {% endif %}
+                            Database APIs
+                        </p>
                     </div>
                     <div class="card-content">
-                        <div class="content title is-4">{{user.databaseinfo_set.count}}</div>
+                        <div class="content title is-4">{{dbs.count}}</div>
                     </div>
                 </div>
             </div>
             <div class="column">
                 <div class="card">
                     <div class="card-header">
-                        <p class="card-header-title">Query Methods</p>
+                        <p class="card-header-title">
+                            {% if not my_dbs %}
+                            Total
+                            {% endif %}
+                            Query Methods
+                        </p>
                     </div>
                     <div class="card-content">
-                        <div class="content title is-4">{{user.querymethod_set.count}}</div>
+                        <div class="content title is-4">{{methods_count}}</div>
                     </div>
                 </div>
             </div>
             <div class="column">
                 <div class="card">
                     <div class="card-header ">
-                        <p class="card-header-title">Running</p>
+                        <p class="card-header-title">
+                            {% if not my_dbs %}
+                            Total
+                            {% endif %}
+                            Running
+                        </p>
                     </div>
                     <div class="card-content">
-                        <div class="content title is-4">{{ user.databaseinfo_set|count_running }}</div>
+                        <div class="content title is-4">{{ dbs|count_running }}</div>
                     </div>
                 </div>
             </div>
             <div class="column">
                 <div class="card">
                     <div class="card-header">
-                        <p class="card-header-title">Stopped</p>
+                        <p class="card-header-title">
+                            {% if not my_dbs %}
+                            Total
+                            {% endif %}
+                            Stopped
+                        </p>
                     </div>
                     <div class="card-content">
-                        <div class="content title is-4">{{ user.databaseinfo_set|count_stopped }}</div>
+                        <div class="content title is-4">{{ dbs|count_stopped }}</div>
                     </div>
                 </div>
             </div>
@@ -54,7 +82,12 @@
         <div class="level">
             <div class="level-left">
                 <div class="level-item">
-                    <strong class="is-size-4">Database APIs:</strong>
+                    <strong class="is-size-4">
+                        {% if not my_dbs %}
+                        All
+                        {% endif %}
+                        Database APIs:
+                    </strong>
                 </div>
             </div>
             <div class="level-right">
@@ -66,7 +99,7 @@
             </div>
         </div>
         <!-- Generate a table for showing all user databases -->
-        {% if user.databaseinfo_set.all %}
+        {% if dbs %}
         <div class="table-container">
             <table class="table is-fullwidth is-striped is-bordered">
                 <thead class="has-background-info-light">
@@ -84,7 +117,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for db_info in user.databaseinfo_set.all %}
+                    {% for db_info in dbs.all %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td><a href="{% url 'database' db_info.pk %}">{{db_info.name_en}}</a></td>

@@ -53,6 +53,35 @@ class Dashboard(LoginRequiredMixin, TemplateView):
         # docker_ok variable will be used in template to show a notification
         # if docker service is not running
         context['docker_ok'] = check_docker_daemon()
+        context['dbs'] = DatabaseInfo.objects.filter(creator=self.request.user)
+        context['methods_count'] = QueryMethod.objects.filter(
+            creator=self.request.user).count()
+        context['my_dbs'] = True
+        return context
+
+
+class AllApis(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard.html"
+    login_url = LOGIN_URL
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Get a list of the databases that are running
+        running_dbs = DatabaseInfo.objects.annotate(
+            text_len=Length('docker_id')).filter(Q(text_len__gt=0))
+        # Mark a database as 'stopped' if the docker id is invalid
+        for db in running_dbs:
+            if not check_container_exists(db.docker_id):
+                db.docker_id = ""
+                db.health = False
+                db.save()
+        # docker_ok variable will be used in template to show a notification
+        # if docker service is not running
+        context['docker_ok'] = check_docker_daemon()
+        context['dbs'] = DatabaseInfo.objects.all()
+        context['methods_count'] = QueryMethod.objects.all().count()
+        context['my_dbs'] = False
         return context
 
 
@@ -169,8 +198,9 @@ def delete_database(request, database_id):
     only the creator can delete the database
     """
     db = get_object_or_404(DatabaseInfo, pk=database_id)
-    if request.user != db.creator:
-        return redirect(reverse('edit_db', kwargs={'database_id': database_id}))
+    # Uncomment if needed
+    # if request.user != db.creator:
+    # return redirect(reverse('edit_db', kwargs={'database_id': database_id}))
     db.delete()
     return redirect('dashboard')
 
@@ -182,8 +212,9 @@ def delete_method(request, database_id, method_id):
     only the creator can delete the database
     """
     method = get_object_or_404(QueryMethod, pk=method_id)
-    if request.user != method.creator:
-        return redirect(reverse('database', kwargs={'database_id': database_id}))
+    # Uncomment if needed
+    # if request.user != method.creator:
+    #    return redirect(reverse('database', kwargs={'database_id': database_id}))
     method.delete()
     return redirect(reverse('database', kwargs={'database_id': database_id}))
 
@@ -223,6 +254,11 @@ def stats_view(request):
     """
 
     all_dbs = DatabaseInfo.objects.all()
+    dbs_count = DatabaseInfo.objects.all().count()
+    methods_count = QueryMethod.objects.all().count()
+    running_count = DatabaseInfo.objects.annotate(
+        text_len=Length('docker_id')).filter(Q(text_len__gt=0)).count()
+    stopped_count = dbs_count - running_count
 
     def get_data_for_category(category):
         """
@@ -268,10 +304,14 @@ def stats_view(request):
         is_method = category == 'all_methods'
         items = get_data_for_category(category)
         return render(request, 'stats.html', {'items': items, 'is_method': is_method,
-                                              'selected_category': category})
+                                              'selected_category': category, 'dbs_count': dbs_count,
+                                              'methods_count': methods_count, 'running_count': running_count,
+                                              'stopped_count': stopped_count})
     else:
         return render(request, 'stats.html', {'items': all_dbs, 'is_method': False,
-                                              'selected_category': 'all_dbs'})
+                                              'selected_category': 'all_dbs', 'dbs_count': dbs_count,
+                                              'methods_count': methods_count, 'running_count': running_count,
+                                              'stopped_count': stopped_count})
 
 
 def signup(request):

@@ -7,6 +7,7 @@ urlpatterns = [
     path('', views.HomePage.as_view(), name='home'),
     path('signup/', views.signup, name='signup'),
     path('dashboard/', views.Dashboard.as_view(), name='dashboard'),
+    path('all_apis/', views.AllApis.as_view(), name='all_apis'),
     path('dashboard/import_db/', views.DatabaseEdit.as_view(), name='import_db'),
     path('dashboard/db/<int:database_id>/edit/',
          views.DatabaseEdit.as_view(), name='edit_db'),

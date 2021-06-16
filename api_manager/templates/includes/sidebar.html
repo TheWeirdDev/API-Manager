@@ -8,6 +8,11 @@
                 </a>
             </li>
             <li>
+                <a href="{% url 'all_apis' %}" class="{% if active_tab == 'all_apis' %}is-active{% endif %}">
+                    <span class="icon"><i class="fa fa-list"></i></span> All APIs
+                </a>
+            </li>
+            <li>
                 <a href="{% url 'search' %}" class="{% if active_tab == 'search' %}is-active{% endif %}"">
                     <span class=" icon"><i class="fa fa-search"></i></span> Search
                 </a>

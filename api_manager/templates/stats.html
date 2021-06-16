@@ -15,7 +15,7 @@
                                 <p class="card-header-title">Total Database APIs</p>
                             </div>
                             <div class="card-content">
-                                <div class="content title is-4">{{user.databaseinfo_set.count}}</div>
+                                <div class="content title is-4">{{dbs_count}}</div>
                             </div>
                         </div>
                     </div>
@@ -25,7 +25,7 @@
                                 <p class="card-header-title">Total Query Methods</p>
                             </div>
                             <div class="card-content">
-                                <div class="content title is-4">{{user.querymethod_set.count}}</div>
+                                <div class="content title is-4">{{methods_count}}</div>
                             </div>
                         </div>
                     </div>
@@ -35,7 +35,7 @@
                                 <p class="card-header-title">Total Running</p>
                             </div>
                             <div class="card-content">
-                                <div class="content title is-4">{{ user.databaseinfo_set|count_running }}</div>
+                                <div class="content title is-4">{{ running_count }}</div>
                             </div>
                         </div>
                     </div>
@@ -45,7 +45,7 @@
                                 <p class="card-header-title">Total Stopped</p>
                             </div>
                             <div class="card-content">
-                                <div class="content title is-4">{{ user.databaseinfo_set|count_stopped }}</div>
+                                <div class="content title is-4">{{ stopped_count }}</div>
                             </div>
                         </div>
                     </div>

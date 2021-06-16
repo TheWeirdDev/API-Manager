@@ -16,7 +16,7 @@
         <nav class="navbar has-shadow navbar-padding is-link" role="navigation" aria-label="main navigation">
             <div class="navbar-brand">
                 <a class="navbar-item" href="{% url 'dashboard' %}">
-                    <span class="icon"><i class="fa fa-home"></i></span> Dashboard
+                    <span class="icon"><i class="fa fa-home"></i></span> <span> Dashboard</span>
                 </a>
                 <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navMenu">
                     <span aria-hidden="true"></span>
@@ -25,28 +25,20 @@
                 </a>
             </div>
             <div class="navbar-menu" id="navMenu">
-                {% if user.is_authenticated %}
                 <div class="navbar-end">
-                    <a class="navbar-item is-tab is-hidden-tablet">
-                        <span class="icon"><i class="fa fa-search"></i></span> Search
+                    <a class="navbar-item is-tab is-hidden-tablet" href="{% url 'all_apis' %}">
+                        <span class="icon"><i class="fa fa-list"></i></span> <span>All APIs</span>
                     </a>
-                    <a class="navbar-item is-tab is-hidden-tablet">
-                        <span class="icon"><i class="fa fa-info"></i></span> Statistics
+                    <a class="navbar-item is-tab is-hidden-tablet" href="{% url 'search' %}">
+                        <span class="icon"><i class="fa fa-search"></i></span> <span>Search</span>
+                    </a>
+                    <a class="navbar-item is-tab is-hidden-tablet" href="{% url 'stats' %}">
+                        <span class="icon"><i class="fa fa-info"></i></span> <span>Statistics</span>
                     </a>
                     <a class="navbar-item is-tab" href="{% url 'logout' %}">
-                        <span class="icon"><i class="fa fa-sign-out"></i></span>
+                        <span class="icon"><i class="fa fa-sign-out"></i></span> <span>Log out</span>
                     </a>
                 </div>
-                {% else %}
-                <div class="navbar-end">
-                    <a class="navbar-item is-tab" href="{% url 'login' %}">
-                        <span class="icon"><i class="fa fa-sign-in"></i></span>
-                    </a>
-                    <a class="navbar-item is-tab" href="{% url 'signup' %}">
-                        <span class="icon"><i class="fa fa-user-plus"></i></span>
-                    </a>
-                </div>
-                {% endif %}
             </div>
 
         </nav>
