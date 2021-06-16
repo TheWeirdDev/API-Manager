@@ -41,9 +41,9 @@ def make_shell_command(sender, created, instance, **kwargs):
         instance.status_url = '/' + instance.status_url
         instance.save()
     if created:
-        name = instance.name_en
+        name = instance.name_en.replace(' ', '_')
         port = instance.port_number
-        config_name = instance.config_file_name
+        config_name = instance.config_file_name.replace(' ', '_')
 
         # This is a template for the shell command.
         cmd = f"docker run -d --rm -v /tmp/{config_name}:/db/db.json -p {port}:80 --name {name}" \
