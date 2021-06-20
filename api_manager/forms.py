@@ -1,8 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import DatabaseInfo, QueryMethod
-from django.forms.widgets import Textarea
+from .models import DatabaseInfo, QueryMethod, CommandTemplate
+from django.forms.widgets import Input, Textarea
 
 
 class SignUpForm(UserCreationForm):
@@ -37,26 +37,20 @@ class SearchForm(forms.Form):
 
 
 class DatabaseForm(forms.ModelForm):
-    def __init__(self, is_edit, *args, **kwargs):
+    template = forms.ModelChoiceField(
+        queryset=CommandTemplate.objects.all(),
+        widget=forms.Select(attrs={'id': 'template_select'}))
+
+    def __init__(self, *args, **kwargs):
         super(DatabaseForm, self).__init__(*args, **kwargs)
         for visible in self.visible_fields():
-            # Find the shell command widget
-            if isinstance(visible.field.widget, Textarea):
-                # Only require shell command if user is editing the database
-                if not is_edit:
-                    visible.field.required = False
-                # Shell command is a textarea and so should have this css class
-                visible.field.widget.attrs['class'] = 'textarea'
-                visible.field.widget.attrs['rows'] = '5'
-            else:
-                # Other fields are input widgets and will have 'input' css class
+            if isinstance(visible.field.widget, Input):
                 visible.field.widget.attrs['class'] = 'input'
 
     class Meta:
         model = DatabaseInfo
         # These fields are not going to be provided by the user
-        exclude = ('creator', 'changed_date',
-                   'created_date', 'docker_id', 'health')
+        exclude = ('creator', 'shell_command', 'created_date')
 
 
 class MethodForm(forms.ModelForm):
@@ -65,10 +59,25 @@ class MethodForm(forms.ModelForm):
         for visible in self.visible_fields():
             if isinstance(visible.field.widget, Textarea):
                 visible.field.widget.attrs['class'] = 'textarea'
-                visible.field.widget.attrs['rows'] = '5'
+                visible.field.widget.attrs['rows'] = '3'
             else:
                 visible.field.widget.attrs['class'] = 'input'
 
     class Meta:
         model = QueryMethod
         fields = ('name', 'query_text')
+
+
+class TemplateForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(TemplateForm, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            if isinstance(visible.field.widget, Textarea):
+                visible.field.widget.attrs['class'] = 'textarea'
+                visible.field.widget.attrs['rows'] = '3'
+            else:
+                visible.field.widget.attrs['class'] = 'input'
+
+    class Meta:
+        model = CommandTemplate
+        fields = ('name', 'template_text')

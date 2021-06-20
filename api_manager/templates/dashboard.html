@@ -17,68 +17,7 @@
         <div class="notification is-danger" style="display: none;" id="notif">
             <button class="delete"></button>
         </div>
-        <div class="columns is-mobile is-multiline">
-            <div class="column is-half-mobile">
-                <div class="card" style="height: 100%;">
-                    <div class="card-header">
-                        <p class="card-header-title">
-                            {% if not my_dbs %}
-                            Total
-                            {% endif %}
-                            Database APIs
-                        </p>
-                    </div>
-                    <div class="card-content">
-                        <div class="content title is-4">{{dbs.count}}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="column is-half-mobile">
-                <div class="card" style="height: 100%;">
-                    <div class="card-header">
-                        <p class="card-header-title">
-                            {% if not my_dbs %}
-                            Total
-                            {% endif %}
-                            Query Methods
-                        </p>
-                    </div>
-                    <div class="card-content">
-                        <div class="content title is-4">{{methods_count}}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="column is-half-mobile">
-                <div class="card" style="height: 100%;">
-                    <div class="card-header ">
-                        <p class="card-header-title">
-                            {% if not my_dbs %}
-                            Total
-                            {% endif %}
-                            Running
-                        </p>
-                    </div>
-                    <div class="card-content">
-                        <div class="content title is-4">{{ dbs|count_running }}</div>
-                    </div>
-                </div>
-            </div>
-            <div class="column is-half-mobile">
-                <div class="card" style="height: 100%;">
-                    <div class="card-header">
-                        <p class="card-header-title">
-                            {% if not my_dbs %}
-                            Total
-                            {% endif %}
-                            Stopped
-                        </p>
-                    </div>
-                    <div class="card-content">
-                        <div class="content title is-4">{{ dbs|count_stopped }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
         <div class="level">
             <div class="level-left">
                 <div class="level-item">
@@ -124,23 +63,25 @@
                         <td>{{db_info.name_fa}}</td>
                         <td>{{db_info.server_name}}</td>
                         <td>{{db_info.server_ip}}</td>
-                        <td>{{db_info.port_number}}</td>
+                        <td>{{db_info.server_port}}</td>
                         <td>{{db_info.db_name}}</td>
                         <td>
-                            {% if db_info.docker_id != "" %}
+                            <!-- Todo: CHECK FOR HEALTH -->
                             {% if db_info.health %}
                             <div class="tag is-success">GOOD</div>
                             {% else %}
-                            <div class="tag is-damger">BAD</div>
-                            {% endif %}
+                            <div class="tag is-danger">BAD</div>
                             {% endif %}
                         </td>
                         <td>
-                            {% if db_info.docker_id != "" %}
-                            <div class="tag is-success">YES</div>
-                            {% else %}
-                            <div class="tag is-danger">NO</div>
-                            {% endif %}
+                            <a href="">
+                                <!-- Todo: CHECK FOR RUNNING STATUS -->
+                                {% if None %}
+                                <div class="tag is-success">YES</div>
+                                {% else %}
+                                <div class="tag is-danger">NO</div>
+                                {% endif %}
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -157,11 +98,3 @@
     </div>
 </div>
 {% endblock content %}
-
-{% block scripts %}
-<script type="text/javascript">
-    // Notify the user if docker is not running
-    if ("{{docker_ok}}" == "False")
-        setNotification("Docker service is not running!");
-</script>
-{% endblock scripts %}

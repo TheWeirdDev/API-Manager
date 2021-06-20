@@ -25,10 +25,10 @@
                     </div>
                     {% endif %}
                     <h3 class="title is-3">
-                        {% if  view.kwargs.method_id  %}
-                        Edit Query Method
+                        {% if  view.kwargs.template_id  %}
+                        Edit Template
                         {% else %}
-                        Add a New Query Method
+                        Add a New Template
                         {% endif %}
                     </h3>
                     {% csrf_token %}
@@ -39,30 +39,22 @@
                         </div>
                     </div>
                     <div class="field">
-                        <label class="label" for="{{ form.query_text.id_for_label }}">Query:</label>
+                        <label class="label" for="{{ form.template.id_for_label }}">Template:</label>
                         <div class="control">
-                            {{ form.query_text }}
+                            {{ form.template_text }}
                         </div>
                     </div>
                     <div class="level">
                         <div class="level-left">
-                            {% if  view.kwargs.method_id  %}
-                            <div class="level-item">
-                                <a class="button is-danger"
-                                    href="{% url 'delete_method' view.kwargs.database_id view.kwargs.method_id %}">
-                                    Delete Method
-                                </a>
-                            </div>
-                            {% endif %}
+
                         </div>
                         <div class="level-right">
                             <div class="level-item">
-                                <!-- Go back to the database info page -->
-                                <a href="{{ view.get_success_url }}" class="button">Cancel</a>
+                                <a href="{% url 'settings' %}" class="button">Cancel</a>
                             </div>
                             <div class="level-item">
                                 <button class="button is-success" type="submit">
-                                    {% if  view.kwargs.method_id  %}
+                                    {% if  view.kwargs.template_id  %}
                                     Edit
                                     {% else %}
                                     Add

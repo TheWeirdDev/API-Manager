@@ -1,88 +1,8 @@
-import subprocess
 import urllib
 import urllib.error
-import docker
-from docker.errors import DockerException, NotFound, ContainerError
 import json
 import time
 import socket
-
-
-def prepare_db_config(db):
-    """
-    Preapares the database config file to be used in a container
-    The config will be saved in /tmp/ if it's not already saved.
-    """
-    with open(f"/tmp/{db.config_file_name}", 'w') as f:
-        f.write(generate_json(db))
-
-
-def run_command(cmd):
-    """
-    Runs the shell command to start a database api
-
-    the docker process will print a docker id,
-    and it will be captured and saved.
-    The program will use this id to check the status of the container.
-
-    The return value of this function is a tuple,
-    the first item of which is the docker id and
-    the second item is the error message (if any)
-    """
-    try:
-        process = subprocess.run(
-            cmd.split(),
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        time.sleep(1)
-        # The output will be either the docker id or error message based on the error code
-        # If there was an error, docker id should be `None`
-        if process.returncode > 0:
-            return (None, process.stderr.decode("utf-8").strip())
-        # If it was successful, error message should be `None`
-        return (process.stdout.decode("utf-8").strip(), None)
-    except:
-        return (None, process.stderr.decode("utf-8").strip())
-
-
-def check_docker_daemon():
-    """
-    Check if the docker service is running by simply calling `from_env` function
-    If the service is not running, a DockerException will be raised
-    """
-    try:
-        client = docker.from_env()
-        return client is not None
-    except DockerException:
-        return False
-
-
-def check_container_exists(docker_id):
-    """
-    Given a docker id, this function returns a boolean
-    corresponding to the existance of that container.
-    The result is only 'True' if the container is running
-    """
-    try:
-        client = docker.from_env()
-        container = client.containers.get(docker_id)
-        return container is not None and container.status == 'running'
-    except (DockerException, NotFound, ContainerError) as e:
-        return False
-
-
-def stop_docker_container(docker_id):
-    """
-    Stops a docker container and returns 'True' if the opeation
-    was successful
-    """
-    try:
-        client = docker.from_env()
-        client.containers.get(docker_id).stop(timeout=5)
-        return True
-    except (DockerException, NotFound, ContainerError) as e:
-        return False
 
 
 def check_status(db):
@@ -91,7 +11,7 @@ def check_status(db):
     of that container, if the result code is 200, then it's healthy
     """
     try:
-        url = f"http://127.0.0.1:{db.port_number}{db.status_url}"
+        url = f"http://{db.server_ip}:{db.server_port}{db.status_url}"
         http_req = urllib.request.urlopen(url, timeout=3)
     except (urllib.error.URLError, socket.timeout) as e:
         print("Error: ", e)
@@ -142,10 +62,13 @@ def write_db_csv(writer, items):
                      'DB Username',
                      'DB Password',
                      'Shell Command',
-                     'Health',
-                     'Running', ])
+                     # 'Health',
+                     # 'Running',
+                     ])
     for i in items:
-        running = i.docker_id != ""
-        health = i.health if running else ""
-        writer.writerow([i.name_en, i.name_fa, i.server_name, i.server_ip, i.port_number, i.db_name,
-                         i.db_username, i.db_password, i.shell_command, health, running])
+        # running = Check if it's running
+        # health = Check health
+        writer.writerow([i.name_en, i.name_fa, i.server_name, i.server_ip, i.server_port, i.db_name,
+                         i.db_username, i.db_password, i.shell_command,
+                         #health, running
+                         ])

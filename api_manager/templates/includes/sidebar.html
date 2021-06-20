@@ -1,5 +1,5 @@
-<aside class=" column is-2 is-narrow-mobile section is-hidden-mobile sidebar">
-    <nav class=" menu">
+<aside class="column is-2 is-narrow-mobile section is-hidden-mobile sidebar">
+    <nav class="menu">
         <p class="menu-label is-hidden-touch">Navigation</p>
         <ul class="menu-list">
             <li>
@@ -20,6 +20,11 @@
             <li>
                 <a href="{% url 'stats' %}" class="{% if active_tab == 'stats' %}is-active{% endif %}"">
                     <span class=" icon"><i class="fa fa-info"></i></span> Statistics
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'settings' %}" class="{% if active_tab == 'settings' %}is-active{% endif %}"">
+                    <span class=" icon"><i class="fa fa-gear"></i></span> Settings
                 </a>
             </li>
         </ul>

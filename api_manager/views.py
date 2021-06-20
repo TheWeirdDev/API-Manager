@@ -15,10 +15,10 @@ from django.db.models import Q
 from django.db.models.functions import Length
 
 import csv
+import json
 
-from .forms import SignUpForm, DatabaseForm, MethodForm, SearchForm
-from .models import DatabaseInfo, QueryMethod
-from .templatetags.tags import get_running, get_stopped
+from .forms import SignUpForm, DatabaseForm, MethodForm, SearchForm, TemplateForm
+from .models import DatabaseInfo, QueryMethod, CommandTemplate
 from .utils import *
 
 LOGIN_URL = '/login/'
@@ -40,19 +40,6 @@ class Dashboard(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        # Get a list of the databases that are running
-        running_dbs = DatabaseInfo.objects.annotate(
-            text_len=Length('docker_id')).filter(Q(creator=self.request.user) & Q(text_len__gt=0))
-        # Mark a database as 'stopped' if the docker id is invalid
-        for db in running_dbs:
-            if not check_container_exists(db.docker_id):
-                db.docker_id = ""
-                db.health = False
-                db.save()
-        # docker_ok variable will be used in template to show a notification
-        # if docker service is not running
-        context['docker_ok'] = check_docker_daemon()
         context['dbs'] = DatabaseInfo.objects.filter(creator=self.request.user)
         context['methods_count'] = QueryMethod.objects.filter(
             creator=self.request.user).count()
@@ -66,19 +53,6 @@ class AllApis(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        # Get a list of the databases that are running
-        running_dbs = DatabaseInfo.objects.annotate(
-            text_len=Length('docker_id')).filter(Q(text_len__gt=0))
-        # Mark a database as 'stopped' if the docker id is invalid
-        for db in running_dbs:
-            if not check_container_exists(db.docker_id):
-                db.docker_id = ""
-                db.health = False
-                db.save()
-        # docker_ok variable will be used in template to show a notification
-        # if docker service is not running
-        context['docker_ok'] = check_docker_daemon()
         context['dbs'] = DatabaseInfo.objects.all()
         context['methods_count'] = QueryMethod.objects.all().count()
         context['my_dbs'] = False
@@ -90,11 +64,20 @@ class DatabaseEdit(LoginRequiredMixin, FormView):
     form_class = DatabaseForm
     login_url = LOGIN_URL
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        templates = CommandTemplate.objects.all()
+        context["templates"] = templates
+        t_list = []
+        for t in templates:
+            t_list.append(
+                {'template_id': t.pk, 'name': t.name, 'template_text': t.template_text})
+        context["template_list"] = json.dumps(t_list)
+        return context
+
     def get_success_url(self):
         # if 'database_id' is present, then we are in editing mode,
         # otherwise we are in 'add database' page
-        # After adding a new database, we would want to go back to the dashboard,
-        # but after editing one, we would want to see it's page
         if 'database_id' in self.kwargs:
             return reverse('database', kwargs={'database_id': self.database.pk})
         return reverse('dashboard')
@@ -104,26 +87,15 @@ class DatabaseEdit(LoginRequiredMixin, FormView):
         if 'database_id' in self.kwargs:
             self.database = get_object_or_404(
                 DatabaseInfo, pk=self.kwargs.get('database_id'))
-            return self.form_class(True, instance=self.database, **self.get_form_kwargs())
-        return self.form_class(False, **self.get_form_kwargs())
+            return self.form_class(instance=self.database, **self.get_form_kwargs())
+        return self.form_class(**self.get_form_kwargs())
 
     def form_valid(self, form):
         database = form.save(commit=False)
 
-        # If database doesn't have 'creator' property, it has just been created,
-        # Otherwise it was changed, so we should update the 'changed_date' field
+        # If database doesn't have 'creator' property, it has just been created
         if not hasattr(database, 'creator'):
             database.creator = self.request.user
-        else:
-            # Shell command should have this prefix, otherwise we'll not get a docker id
-            PREFIX = 'docker run -d'
-            if not database.shell_command.startswith(PREFIX):
-                form.add_error('shell_command',
-                               f'Shell command has to star with "{PREFIX}"')
-                return super(DatabaseEdit, self).form_invalid(form)
-            # Remove unwanted newlines
-            database.shell_command = database.shell_command.replace('\n', '')
-            database.changed_date = timezone.now()
 
         database.save()
         return super(DatabaseEdit, self).form_valid(form)
@@ -156,13 +128,10 @@ class MethodEdit(LoginRequiredMixin, FormView):
 
     def form_valid(self, form):
         method = form.save(commit=False)
-        # If QueryMethod doesn't have 'creator' property, it has just been created,
-        # Otherwise it was changed, so we should update the 'changed_date' field
+        # If QueryMethod doesn't have 'creator' property, it has just been created
         if not hasattr(method, 'creator'):
             method.creator = self.request.user
             method.parent_db = self.database
-        else:
-            method.changed_date = timezone.now()
 
         # Save the method, only if it's name is uniqe in the same database
         try:
@@ -178,15 +147,19 @@ class DatabaseView(LoginRequiredMixin, TemplateView):
     template_name = "view_db.html"
     login_url = LOGIN_URL
 
+    def post(self, request, **kwargs):
+        self.database = get_object_or_404(
+            DatabaseInfo, pk=self.kwargs['database_id'])
+        items = self.database.querymethod_set.all()
+        if request.POST.get('print_results', None):
+            return print_results(request, items, 'methods')
+        if request.POST.get('download_csv', None):
+            return download_report(request, items, True)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         self.database = get_object_or_404(
             DatabaseInfo, pk=self.kwargs['database_id'])
-        # Check if it is actually running
-        if not check_container_exists(self.database.docker_id):
-            self.database.docker_id = ""
-            self.database.health = False
-            self.database.save()
         context['database'] = self.database
         return context
 
@@ -195,12 +168,8 @@ class DatabaseView(LoginRequiredMixin, TemplateView):
 def delete_database(request, database_id):
     """
     Delete a database by providing the database id
-    only the creator can delete the database
     """
     db = get_object_or_404(DatabaseInfo, pk=database_id)
-    # Uncomment if needed
-    # if request.user != db.creator:
-    # return redirect(reverse('edit_db', kwargs={'database_id': database_id}))
     db.delete()
     return redirect('dashboard')
 
@@ -209,14 +178,20 @@ def delete_database(request, database_id):
 def delete_method(request, database_id, method_id):
     """
     Delete a query method by specifying the method id
-    only the creator can delete the database
     """
     method = get_object_or_404(QueryMethod, pk=method_id)
-    # Uncomment if needed
-    # if request.user != method.creator:
-    #    return redirect(reverse('database', kwargs={'database_id': database_id}))
     method.delete()
     return redirect(reverse('database', kwargs={'database_id': database_id}))
+
+
+@login_required(login_url=LOGIN_URL)
+def delete_command_template(request, template_id):
+    """
+    Delete a template by specifying the template id
+    """
+    method = get_object_or_404(CommandTemplate, pk=template_id)
+    method.delete()
+    return redirect(reverse('settings'))
 
 
 @login_required(login_url=LOGIN_URL)
@@ -247,6 +222,26 @@ def search_view(request):
         return render(request, 'search.html', {'form': form, 'is_get': True})
 
 
+def print_results(request, items, category):
+    return render(request, 'print.html', {'items': items, 'category': category})
+
+
+def download_report(request, items, is_methods):
+    date_now = dateformat.format(timezone.now(), 'Y-m-d_H-i-s')
+    response = HttpResponse(
+        content_type='text/csv',
+        headers={
+            'Content-Disposition':
+                f'attachment; filename="report_{date_now}.csv"'},
+    )
+    writer = csv.writer(response)
+    if is_methods:
+        write_method_csv(writer, items)
+    else:
+        write_db_csv(writer, items)
+    return response
+
+
 @login_required(login_url=LOGIN_URL)
 def stats_view(request):
     """
@@ -254,11 +249,6 @@ def stats_view(request):
     """
 
     all_dbs = DatabaseInfo.objects.all()
-    dbs_count = DatabaseInfo.objects.all().count()
-    methods_count = QueryMethod.objects.all().count()
-    running_count = DatabaseInfo.objects.annotate(
-        text_len=Length('docker_id')).filter(Q(text_len__gt=0)).count()
-    stopped_count = dbs_count - running_count
 
     def get_data_for_category(category):
         """
@@ -268,50 +258,31 @@ def stats_view(request):
             items = QueryMethod.objects.all()
         elif category == "all_dbs":
             items = all_dbs
-        elif category == "running":
-            items = get_running(all_dbs)
-        elif category == "stopped":
-            items = get_stopped(all_dbs)
         return items
 
     if request.method == 'POST':
         # download_csv is only present if 'Download report' button was clicked
         download_csv_category = request.POST.get('download_csv', None)
         if download_csv_category:
-            date_now = dateformat.format(timezone.now(), 'Y-m-d_H-i-s')
-            response = HttpResponse(
-                content_type='text/csv',
-                headers={
-                    'Content-Disposition':
-                        f'attachment; filename="report-{download_csv_category}_{date_now}.csv"'},
-            )
-            writer = csv.writer(response)
             items = get_data_for_category(download_csv_category)
-            if download_csv_category == 'all_methods':
-                write_method_csv(writer, items)
-            else:
-                write_db_csv(writer, items)
-            return response
+            is_method = download_csv_category == 'all_methods'
+            return download_report(request, items, is_method)
 
         # Similarly, print_category is present when 'Print' was clicked
         print_category = request.POST.get('print_results', None)
         if print_category:
             items = get_data_for_category(print_category)
-            return render(request, 'print.html', {'items': items, 'category': print_category})
+            return print_results(request, items, print_category)
 
         # If those buttons were not clicked, just show the results
         category = request.POST['category']
         is_method = category == 'all_methods'
         items = get_data_for_category(category)
         return render(request, 'stats.html', {'items': items, 'is_method': is_method,
-                                              'selected_category': category, 'dbs_count': dbs_count,
-                                              'methods_count': methods_count, 'running_count': running_count,
-                                              'stopped_count': stopped_count})
+                                              'selected_category': category, })
     else:
         return render(request, 'stats.html', {'items': all_dbs, 'is_method': False,
-                                              'selected_category': 'all_dbs', 'dbs_count': dbs_count,
-                                              'methods_count': methods_count, 'running_count': running_count,
-                                              'stopped_count': stopped_count})
+                                              'selected_category': 'all_dbs'})
 
 
 def signup(request):
@@ -354,67 +325,38 @@ def generate_json_config(request, database_id):
     return response
 
 
-@login_required(login_url=LOGIN_URL)
-def run_api(request, database_id):
-    """
-    Runs the docker shell command for the database
-    and checks the health and the status of the container
-    """
-    database = get_object_or_404(DatabaseInfo, pk=database_id)
-    if database.docker_id != "":
-        return JsonResponse({'error': "API is already running"})
+class Settings(LoginRequiredMixin, TemplateView):
+    template_name = "settings.html"
+    login_url = LOGIN_URL
 
-    # Make sure db config file exists
-    prepare_db_config(database)
-
-    docker_id, error_message = run_command(database.shell_command)
-
-    resp = {'running': False, 'docker_id': docker_id,
-            'health_ok': False, 'error_message': error_message}
-
-    if docker_id not in ("", None):
-        database.docker_id = docker_id
-        database.save()
-        resp['running'] = True
-        # Opening the status url should give the status code 200
-        if check_status(database) == 200:
-            resp['health_ok'] = True
-            database.health = True
-            database.save()
-    return JsonResponse(resp)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        templates = CommandTemplate.objects.all()
+        context['templates'] = templates
+        return context
 
 
-@login_required(login_url=LOGIN_URL)
-def stop_api(request, database_id):
-    """
-    Stops the api container and clears database info field
-    """
-    database = get_object_or_404(DatabaseInfo, pk=database_id)
-    if database.docker_id == "":
-        return JsonResponse({'error': "API is not running"})
-    if stop_docker_container(database.docker_id):
-        database.docker_id = ""
-        database.health = False
-        database.save()
-        return JsonResponse({'running': False})
-    else:
-        return JsonResponse({'error': "Can't stop API"})
+class TemplateEdit(LoginRequiredMixin, FormView):
+    template_name = "edit_templates.html"
+    form_class = TemplateForm
+    login_url = LOGIN_URL
 
+    def get_form(self):
+        # if 'template_id' is present, then we are in editing mode
+        if 'template_id' in self.kwargs:
+            self.template = get_object_or_404(
+                CommandTemplate, pk=self.kwargs.get('template_id'))
+            return self.form_class(instance=self.template, **self.get_form_kwargs())
+        return self.form_class(**self.get_form_kwargs())
 
-@login_required(login_url=LOGIN_URL)
-def check_health(request, database_id):
-    """
-    Checks the health of a database api by opening the status url
-    and then updates the database object
-    """
-    database = get_object_or_404(DatabaseInfo, pk=database_id)
-    if database.docker_id == "":
-        return JsonResponse({'error': 'API is not running'})
-    if check_status(database) == 200:
-        database.health = True
-        database.save()
-        return JsonResponse({'health_ok': True})
-    else:
-        database.health = False
-        database.save()
-        return JsonResponse({'error': 'API status code is not 200'})
+    def get_success_url(self):
+        return reverse('settings')
+
+    def form_valid(self, form):
+        template = form.save(commit=False)
+
+        if not hasattr(template, 'creator'):
+            template.creator = self.request.user
+
+        template.save()
+        return super(TemplateEdit, self).form_valid(form)

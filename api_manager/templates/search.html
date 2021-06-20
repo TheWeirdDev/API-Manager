@@ -85,19 +85,19 @@
                         <td>{{db_info.name_fa}}</td>
                         <td>{{db_info.server_name}}</td>
                         <td>{{db_info.server_ip}}</td>
-                        <td>{{db_info.port_number}}</td>
+                        <td>{{db_info.server_port}}</td>
                         <td>{{db_info.db_name}}</td>
                         <td>
-                            {% if db_info.docker_id != "" %}
-                            {% if db_info.health %}
+                            <!-- Todo: CHECK FOR HEALTH -->
+                            {% if None %}
                             <div class="tag is-success">GOOD</div>
                             {% else %}
                             <div class="tag is-damger">BAD</div>
                             {% endif %}
-                            {% endif %}
                         </td>
                         <td>
-                            {% if db_info.docker_id != "" %}
+                            <!-- Todo: CHECK FOR RUNNING STATUS -->
+                            {% if None %}
                             <div class="tag is-success">YES</div>
                             {% else %}
                             <div class="tag is-danger">NO</div>

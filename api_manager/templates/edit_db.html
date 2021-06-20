@@ -5,165 +5,217 @@
 {% endblock sidebar %}
 
 {% block content %}
-<section class="section">
-    <div class="container">
-        <div class="columns is-centered">
-            <div class="column is-four-fifths-desktop">
-                <form class="box" method="POST">
-                    {% if form.errors %}
-                    <div class="notification is-danger is-light">
-                        <p>There were some errors in the information you entered. Please correct the following:</p>
-                        <br>
-                        {{ form.non_field_errors }}
-                        <ul>
-                            {% for field in form %}
-                            {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %}
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    {% endif %}
+<div class="columns is-centered">
+    <div class="column is-12">
+        <form class="box" method="POST">
+            {% if form.errors %}
+            <div class="notification is-danger is-light">
+                <p>There were some errors in the information you entered. Please correct the following:</p>
+                <br>
+                {{ form.non_field_errors }}
+                <ul>
+                    {% for field in form %}
+                    {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
 
-                    <h3 class="title is-3">
-                        {% comment %}
-                        <!--
+            <h3 class="title is-3">
+                {% comment %}
+                <!--
                             database id is only provided when editing the database
                             we can differentiate between adding and editing modes
                             by looking for this parameter,
                         -->
-                        {% endcomment %}
+                {% endcomment %}
 
-                        {% if  view.kwargs.database_id  %}
-                        Edit Database
-                        {% else %}
-                        Add a New Database API
-                        {% endif %}
-                    </h3>
-                    {% csrf_token %}
-                    <div class="columns">
-                        <div class="field column">
-                            <label class="label" for="{{ form.name_en.id_for_label }}">Project Name (English):</label>
-                            <div class="control">
-                                {{ form.name_en }}
-                            </div>
-                        </div>
-                        <div class="field column">
-                            <label class="label" for="{{ form.name_fa.id_for_label }}">Project Name (Farsi):</label>
-                            <div class="control">
-                                {{ form.name_fa }}
-                            </div>
-                        </div>
-                        <div class="field column">
-                            <label class="label" for="{{ form.db_name.id_for_label }}">Database Name:</label>
-                            <div class="control">
-                                {{ form.db_name }}
-                            </div>
-                        </div>
+                {% if  view.kwargs.database_id  %}
+                Edit Database
+                {% else %}
+                Add a New Database API
+                {% endif %}
+            </h3>
+            {% csrf_token %}
+            <fieldset class="columns">
+                <div class="field column">
+                    <label class="label" for="{{ form.name_en.id_for_label }}">Project Name (English):</label>
+                    <div class="control">
+                        {{ form.name_en }}
                     </div>
-                    <div class="columns">
-                        <div class="field column">
-                            <label class="label" for="{{ form.server_ip.id_for_label }}">Server IP:</label>
-                            <div class="control">
-                                {{ form.server_ip }}
-                            </div>
-                        </div>
-                        <div class="field column">
-                            <label class="label" for="{{ form.port_number.id_for_label }}">Port:</label>
-                            <div class="control">
-                                {{ form.port_number }}
-                            </div>
-                        </div>
-                        <div class="field column">
-                            <label class="label" for="{{ form.server_name.id_for_label }}">Server Name:</label>
-                            <div class="control">
-                                {{ form.server_name }}
-                            </div>
-                        </div>
+                </div>
+                <div class="field column">
+                    <label class="label" for="{{ form.name_fa.id_for_label }}">Project Name (Farsi):</label>
+                    <div class="control">
+                        {{ form.name_fa }}
                     </div>
-                    <div class="columns">
-                        <div class="field column">
-                            <label class="label" for="{{ form.db_username.id_for_label }}">Database Username:</label>
-                            <div class="control">
-                                {{ form.db_username }}
-                            </div>
-                        </div>
-                        <div class="field column">
-                            <label class="label" for="{{ form.db_password.id_for_label }}">Database Password:</label>
-                            <div class="control">
-                                {{ form.db_password }}
-                            </div>
-                        </div>
+                </div>
+            </fieldset>
+            <div class="divider">Server Details</div>
+            <fieldset class="columns">
+                <div class="field column">
+                    <label class="label" for="{{ form.server_name.id_for_label }}">Server Name:</label>
+                    <div class="control">
+                        {{ form.server_name }}
+                    </div>
+                </div>
+                <div class="field column">
+                    <label class="label" for="{{ form.server_ip.id_for_label }}">Server IP:</label>
+                    <div class="control">
+                        {{ form.server_ip }}
+                    </div>
+                </div>
+                <div class="field column">
+                    <label class="label" for="{{ form.server_port.id_for_label }}">Server Port:</label>
+                    <div class="control">
+                        {{ form.server_port }}
+                    </div>
+                </div>
+            </fieldset>
+            <div class="divider">Database Details</div>
+            <fieldset class="columns">
+                <div class="field column">
+                    <label class="label" for="{{ form.db_name.id_for_label }}">DB
+                        Name:</label>
+                    <div class="control">
+                        {{ form.db_name }}
+                    </div>
+                </div>
+                <div class="field column">
+                    <label class="label" for="{{ form.db_username.id_for_label }}">DB Username:</label>
+                    <div class="control">
+                        {{ form.db_username }}
+                    </div>
+                </div>
+                <div class="field column">
+                    <label class="label" for="{{ form.db_password.id_for_label }}">DB Password:</label>
+                    <div class="control">
+                        {{ form.db_password }}
+                    </div>
+                </div>
+                <div class="field column">
+                    <label class="label" for="{{ form.db_server.id_for_label }}">DB
+                        Server:</label>
+                    <div class="control">
+                        {{ form.db_server }}
+                    </div>
+                </div>
+            </fieldset>
+            <div class="divider">Other</div>
+            <fieldset class="columns">
+                <div class="field column">
+                    <label class="label" for="{{ form.status_url.id_for_label }}">Status
+                        URL:</label>
+                    <div class="control">
+                        {{ form.status_url }}
+                    </div>
+                </div>
+                <div class="field column">
+                    <label class="label" for="{{ form.swagger_url.id_for_label }}">Swagger
+                        URL:</label>
+                    <div class="control">
+                        {{ form.swagger_url }}
+                    </div>
+                </div>
+                <div class="field column">
+                    <label class="label" for="{{ form.config_file_name.id_for_label }}">Config File
+                        Name:</label>
+                    <div class="control">
+                        {{ form.config_file_name }}
+                    </div>
+                </div>
+            </fieldset>
 
-                        <div class="field column">
-                            <label class="label" for="{{ form.config_file_name.id_for_label }}">Config File
-                                Name:</label>
-                            <div class="control">
-                                {{ form.config_file_name }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label class="label" for="{{ form.status_url.id_for_label }}">Status
-                            URL:</label>
-                        <div class="control">
-                            {{ form.status_url }}
-                        </div>
-                    </div>
 
-                    {% comment %}
-                    <!--
+            {% comment %}
+            <!--
                         Only show the shell command textarea when user is editing the database
                     -->
-                    {% endcomment %}
-                    {% if  view.kwargs.database_id  %}
-                    <div class="field">
-                        <label class="label" for="{{ form.shell_command.id_for_label }}">Shell Command:</label>
-                        {{ form.shell_command }}
-                        <ul style="list-style-type: circle; padding: 1rem;">
-                            <li>
-                                <small class="has-text-info-dark">
-                                    Shell command is only auto-generated when first created,
-                                    If you need to change the details, be sure to update shell command too
-                                </small>
-                            </li>
-                            <li>
-                                <small class="has-text-info-dark">
-                                    Shell command should start with "docker run -d", otherwise it will not be saved
-                                </small>
-                            </li>
-                        </ul>
+            {% endcomment %}
+            <div class="level">
+                <div class="level-left">
+                    <div class="level-item">
+                        <label class="label">Command Template:</label>
                     </div>
-                    {% else %}
-                    {{ form.shell_command.as_hidden }}
+                    <div class="level-item">
+                        <div class="select">
+                            {{ form.template }}
+                        </div>
+                    </div>
+                    {% if form.template.field.choices.queryset.all|length == 0 %}
+                    <span style="color:red;" class="level-item">There are no templates available, make a new template
+                        first. </span>
                     {% endif %}
-
-                    <div class="level">
-                        <div class="level-left">
-                            {% if  view.kwargs.database_id  %}
-                            <div class="level-item">
-                                <a class="button is-danger" href="{% url 'delete_db' view.kwargs.database_id %}">
-                                    Delete Database
-                                </a>
-                            </div>
-                            {% endif %}
-                        </div>
-                        <div class="level-right">
-                            <div class="level-item">
-                                <a href="{{ view.get_success_url }}" class="button">Cancel</a>
-                            </div>
-                            <div class="level-item">
-                                <button class="button is-success" type="submit">
-                                    {% if  view.kwargs.database_id  %}
-                                    Edit
-                                    {% else %}
-                                    Add
-                                    {% endif %}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
+                </div>
             </div>
-        </div>
+            <div class="field">
+                <textarea cols="40" rows="2" maxlength="500" class="textarea" id="command" style="font-size: 1.3rem;"
+                    name="shell_command" disabled></textarea>
+            </div>
+            <div class="level">
+                <div class="level-left">
+                    {% if view.kwargs.database_id %}
+                    <div class="level-item">
+                        <a class="button is-danger" href="{% url 'delete_db' view.kwargs.database_id %}">
+                            Delete Database
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="level-right">
+                    <div class="level-item">
+                        <a href="{{ view.get_success_url }}" class="button">Cancel</a>
+                    </div>
+                    <div class="level-item">
+                        <button class="button is-success" type="submit">
+                            {% if view.kwargs.database_id %}
+                            Edit
+                            {% else %}
+                            Add
+                            {% endif %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
-</section>
+</div>
 {% endblock content %}
+
+{% block scripts %}
+{% autoescape off %}
+<script type="text/javascript">
+    const templates = JSON.parse('{{ template_list }}');
+    const cmd = document.querySelector('#command');
+    const port = document.querySelector('#{{ form.server_port.id_for_label }}');
+    const name = document.querySelector('#{{ form.server_name.id_for_label }}');
+    const cfg = document.querySelector('#{{ form.config_file_name.id_for_label }}');
+
+    function generate_command(template) {
+        let tmpl = template.template_text;
+        tmpl = tmpl.replace('%port', parseInt(port.value));
+        tmpl = tmpl.replace('%name', name.value.replaceAll(' ', '_'));
+        tmpl = tmpl.replace('%config_path', cfg.value.replaceAll(' ', '_'));
+        cmd.innerHTML = tmpl;
+    }
+
+    function regenerate() {
+        const id = $('#template_select').val();
+        const template = templates.find((t) => t.template_id == id);
+        generate_command(template);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        for (const i of $('input')) {
+            $(i).on("input", () => {
+                regenerate();
+            });
+        }
+        $('#template_select').change(() => {
+            regenerate();
+        });
+        regenerate();
+    });
+</script>
+{% endautoescape %}
+{% endblock scripts %}

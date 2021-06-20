@@ -29,16 +29,6 @@
                             <button class="button" id="check_health">Check Health</button>
                         </a>
 
-                        {% if database.docker_id != "" %}
-                        <div class="level-item">
-                            <button class="button is-danger" id="stop_api">Stop</button>
-                        </div>
-                        {% else %}
-                        <div class="level-item">
-                            <button class="button is-success" id="run_api">Run</button>
-                        </div>
-                        {% endif %}
-
                     </div>
                 </div>
 
@@ -64,26 +54,29 @@
                                 <td>{{database.name_fa}}</td>
                                 <td>{{database.server_name}}</td>
                                 <td>{{database.server_ip}}</td>
-                                <td>{{database.port_number}}</td>
+                                <td>{{database.server_port}}</td>
                                 <td>{{database.db_name}}</td>
                                 <td>{{database.db_username}}</td>
                                 <td>{{database.db_password}}</td>
                                 <td>
-                                    {% if database.docker_id != "" %}
-                                    {% if database.health %}
+
+                                    <!-- Todo: CHECK FOR HEALTH -->
+                                    {% if None %}
                                     <div class="tag is-success">GOOD</div>
                                     {% else %}
                                     <div class="tag is-danger">BAD</div>
                                     {% endif %}
-                                    {% endif %}
 
                                 </td>
                                 <td>
-                                    {% if database.docker_id != "" %}
-                                    <div class="tag is-success">YES</div>
-                                    {% else %}
-                                    <div class="tag is-danger">NO</div>
-                                    {% endif %}
+                                    <a href="">
+                                        <!-- Todo: CHECK FOR RUNNING STATUS -->
+                                        {% if None %}
+                                        <div class="tag is-success">YES</div>
+                                        {% else %}
+                                        <div class="tag is-danger">NO</div>
+                                        {% endif %}
+                                    </a>
                                 </td>
 
                             </tr>
@@ -101,10 +94,32 @@
                         </div>
                     </div>
                     <div class="level-right">
-                        <div class="level-item">
-                            <a href="{% url 'add_method' database.pk %}">
-                                <button class="button is-link fa fa-plus"></button>
-                            </a>
+                        <div class="level-right">
+                            {% if database.querymethod_set.all %}
+                            <div class="level-item">
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="download_csv" value="download_csv">
+                                    <button class="button is-info" type="submit">
+                                        <span>Download Report</span>
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="level-item">
+                                <form method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="print_results" value="print_results">
+                                    <button class="button is-link" type="submit">
+                                        <span>Print</span>
+                                    </button>
+                                </form>
+                            </div>
+                            {% endif %}
+                            <div class="level-item">
+                                <a href="{% url 'add_method' database.pk %}">
+                                    <button class="button is-link fa fa-plus"></button>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -132,64 +147,12 @@
                     There is no query method for this database
                 </div>
                 {% endif %}
+
             </div>
         </div>
-    </div>
 </section>
 
 {% endblock content %}
 {% block scripts %}
-<script type="text/javascript">
-    $("#check_health").click(function () {
-        $.ajax({
-            dataType: 'json',
-            url: "{% url 'check_health' database.pk %}",
-            success: function (data) {
-                location.reload();
-            },
-            error: function (data) {
-                setNotification("Can't check heatlh'");
-            },
-        });
-    });
-    $("#run_api").click(function () {
-        $.ajax({
-            dataType: 'json',
-            url: "{% url 'run_api' database.pk %}",
-            success: function (data) {
-                if (data.docker_id != "" && data.running) {
-                    location.reload();
-                } else {
-                    setNotification("Can't start API: </br>" + data.error_message);
-                }
-            },
-            error: function (data) {
-                setNotification("Can't start API");
-            },
-        });
-    });
 
-    $("#stop_api").click(function () {
-        setNotification("Stopping... ");
-        $.ajax({
-            dataType: 'json',
-            url: "{% url 'stop_api' database.pk %}",
-            success: function (data) {
-                if (data.error) {
-                    setNotification(data.error);
-                    return;
-                }
-                console.log(data)
-                if (data.running) {
-                    setNotification("Can't stop the API, try stopping manually");
-                } else {
-                    location.reload();
-                }
-            },
-            error: function (data) {
-                setNotification("Can't stop API");
-            },
-        });
-    });
-</script>
 {% endblock scripts %}
