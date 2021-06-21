@@ -25,6 +25,10 @@
                         <a class="level-item is-primary" href="{% url 'gen_config' database.pk %}">
                             <button class="button">Generate Config</button>
                         </a>
+                        <a class="level-item is-primary"
+                            href="https://{{database.server_ip}}:{{database.server_port}}{{ database.swagger_url }}">
+                            <button class="button">Swagger UI</button>
+                        </a>
                         <a class="level-item is-primary">
                             <button class="button" id="check_health">Check Health</button>
                         </a>
@@ -109,7 +113,7 @@
                                 <form method="POST">
                                     {% csrf_token %}
                                     <input type="hidden" name="print_results" value="print_results">
-                                    <button class="button is-link" type="submit">
+                                    <button class="button is-info" type="submit">
                                         <span>Print</span>
                                     </button>
                                 </form>
@@ -130,13 +134,20 @@
                             <tr>
                                 <th>Name</th>
                                 <th>Query</th>
+                                <th>Run</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for method in database.querymethod_set.all %}
                             <tr>
                                 <td><a href="{% url 'edit_method' database.pk method.pk %}">{{method.name}}</a></td>
-                                <td>{{method.query_text}}</td>
+                                <td class="grow">{{method.query_text}}</td>
+                                <td>
+                                    <a
+                                        href="https://{{database.server_ip}}:{{database.server_port}}{{ database.swagger_url }}">
+                                        <button class="button fa fa-play"></button>
+                                    </a>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
