@@ -25,7 +25,7 @@
                         <a class="level-item is-primary" href="{% url 'gen_config' database.pk %}">
                             <button class="button">Generate Config</button>
                         </a>
-                        <a class="level-item is-primary"
+                        <a class="level-item is-primary" target="_blank"
                             href="https://{{database.server_ip}}:{{database.server_port}}{{ database.swagger_url }}">
                             <button class="button">Swagger UI</button>
                         </a>
@@ -64,7 +64,7 @@
                                 <td>{{database.db_password}}</td>
                                 <td>
 
-                                    <!-- Todo: CHECK FOR HEALTH -->
+                                    <!-- CHECK FOR HEALTH -->
                                     {% if None %}
                                     <div class="tag is-success">GOOD</div>
                                     {% else %}
@@ -74,7 +74,7 @@
                                 </td>
                                 <td>
                                     <a href="">
-                                        <!-- Todo: CHECK FOR RUNNING STATUS -->
+                                        <!-- CHECK FOR RUNNING STATUS -->
                                         {% if None %}
                                         <div class="tag is-success">YES</div>
                                         {% else %}
@@ -143,7 +143,7 @@
                                 <td><a href="{% url 'edit_method' database.pk method.pk %}">{{method.name}}</a></td>
                                 <td class="grow">{{method.query_text}}</td>
                                 <td>
-                                    <a
+                                    <a target="_blank"
                                         href="https://{{database.server_ip}}:{{database.server_port}}{{ database.swagger_url }}">
                                         <button class="button fa fa-play"></button>
                                     </a>

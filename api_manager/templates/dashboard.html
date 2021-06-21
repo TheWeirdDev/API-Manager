@@ -66,8 +66,8 @@
                         <td>{{db_info.server_port}}</td>
                         <td>{{db_info.db_name}}</td>
                         <td>
-                            <!-- Todo: CHECK FOR HEALTH -->
-                            {% if db_info.health %}
+                            <!-- CHECK FOR HEALTH -->
+                            {% if None %}
                             <div class="tag is-success">GOOD</div>
                             {% else %}
                             <div class="tag is-danger">BAD</div>
@@ -75,7 +75,7 @@
                         </td>
                         <td>
                             <a href="">
-                                <!-- Todo: CHECK FOR RUNNING STATUS -->
+                                <!-- CHECK FOR RUNNING STATUS -->
                                 {% if None %}
                                 <div class="tag is-success">YES</div>
                                 {% else %}
