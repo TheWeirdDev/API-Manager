@@ -31,7 +31,7 @@ def generate_json(db):
     methods = [{name: query} for name, query in methods_dict.items()]
 
     config = {
-        'server': db.server_ip,
+        'server': db.db_server,
         'database': db.db_name,
         'user': db.db_username,
         'password': db.db_password,
@@ -59,6 +59,7 @@ def write_db_csv(writer, items):
                      'Server IP',
                      'Port',
                      'Database',
+                     'DB Server',
                      'DB Username',
                      'DB Password',
                      'Shell Command',
@@ -69,6 +70,6 @@ def write_db_csv(writer, items):
         # running = Check if it's running
         # health = Check health
         writer.writerow([i.name_en, i.name_fa, i.server_name, i.server_ip, i.server_port, i.db_name,
-                         i.db_username, i.db_password, i.shell_command,
+                         i.db_server, i.db_username, i.db_password, i.shell_command,
                          #health, running
                          ])

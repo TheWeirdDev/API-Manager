@@ -195,7 +195,7 @@
         let tmpl = template.template_text;
         tmpl = tmpl.replace('%port', parseInt(port.value));
         tmpl = tmpl.replace('%name', name.value.replaceAll(' ', '_'));
-        tmpl = tmpl.replace('%config_path', cfg.value.replaceAll(' ', '_'));
+        tmpl = tmpl.replace('%configfilename', cfg.value.replaceAll(' ', '_'));
         cmd.innerHTML = tmpl;
     }
 

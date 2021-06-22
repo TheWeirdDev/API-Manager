@@ -63,7 +63,7 @@ def make_shell_command(sender, instance, **kwargs):
     template = instance.template.template_text
     template = template.replace('%port', str(port))
     template = template.replace('%name', name)
-    template = template.replace('%config_path', config_name)
+    template = template.replace('%configfilename', config_name)
 
     instance.shell_command = template
 

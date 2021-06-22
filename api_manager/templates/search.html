@@ -72,6 +72,7 @@
                         <th>Server IP</th>
                         <th>Port</th>
                         <th>Database</th>
+                        <th>Database Server</th>
                         <th>Health</th>
                         <th>Running</th>
 
@@ -87,12 +88,13 @@
                         <td>{{db_info.server_ip}}</td>
                         <td>{{db_info.server_port}}</td>
                         <td>{{db_info.db_name}}</td>
+                        <td>{{db_info.db_server}}</td>
                         <td>
                             <!-- CHECK FOR HEALTH -->
                             {% if None %}
                             <div class="tag is-success">GOOD</div>
                             {% else %}
-                            <div class="tag is-damger">BAD</div>
+                            <div class="tag is-danger">BAD</div>
                             {% endif %}
                         </td>
                         <td>
